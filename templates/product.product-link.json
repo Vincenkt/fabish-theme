@@ -15,7 +15,6 @@
         "page_full_width": true,
         "page_full_width_spacing": true,
         "use_breadcrumb_title": true,
-        "breadcrumb_image": "shopify://shop_images/about-breadcrumb-1.jpg",
         "breadcrumb_style": "center",
         "image_overlay_opacity": 60,
         "color_scheme": "background-2",
@@ -32,10 +31,12 @@
         },
         "price": {
           "type": "price",
+          "disabled": true,
           "settings": {}
         },
         "caption": {
           "type": "text",
+          "disabled": true,
           "settings": {
             "text": "Grab the best quality fabrics with free size.",
             "text_style": "body"
@@ -61,6 +62,7 @@
         },
         "d0801597-0373-4cce-9004-cd5ceda4203d": {
           "type": "Html_c",
+          "disabled": true,
           "settings": {
             "html": "<p style=\"font-weight: 500;\">Shipping &amp; Return: <span style=\"font-weight: 400;\">Worldwide Shipping in all order $200, Delivery in 2-5 working days</span></p>"
           }
@@ -113,6 +115,7 @@
         },
         "fba18659-f515-470a-ad98-83721b6d8b37": {
           "type": "buy_buttons",
+          "disabled": true,
           "settings": {
             "show_dynamic_checkout": false,
             "show_gift_card_recipient": true
