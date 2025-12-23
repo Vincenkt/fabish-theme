@@ -137,12 +137,13 @@
         "tab_7wchDr": {
           "type": "tab",
           "settings": {
-            "collection": "",
-            "title": "Collection name"
+            "collection": "frontpage",
+            "title": "保健品"
           }
         },
         "tab_XTKwYY": {
           "type": "tab",
+          "disabled": true,
           "settings": {
             "collection": "",
             "title": "Collection name"
@@ -150,6 +151,7 @@
         },
         "tab_CCh8PV": {
           "type": "tab",
+          "disabled": true,
           "settings": {
             "collection": "",
             "title": "Collection name"
@@ -170,7 +172,7 @@
         "heading_size": "h1",
         "sub_heading": "Sub Heading",
         "description": "Use this text to share the information which you like!.",
-        "button_label": "Button label",
+        "button_label": "觀看更多",
         "button_link": "",
         "button_style_secondary": false,
         "column_alignment": "center",
