@@ -243,6 +243,7 @@
     },
     "23fc0f89-bc6e-4058-834a-cbdb1b354f7f": {
       "type": "featured-collection",
+      "disabled": true,
       "settings": {
         "page_full_width": false,
         "page_full_width_spacing": false,
