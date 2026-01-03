@@ -81,6 +81,12 @@
             "html": "<p class=\"shipping\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"27.969\" height=\"21.5\" viewbox=\"0 0 27.969 21.5\">\n  <g id=\"Group_25129\" data-name=\"Group 25129\" transform=\"translate(-1025.238 -1129.238)\">\n    <rect id=\"Rectangle_8802\" data-name=\"Rectangle 8802\" width=\"26.469\" height=\"20\" rx=\"3\" transform=\"translate(1025.988 1129.988)\" fill=\"none\" stroke=\"currentcolor\" stroke-linecap=\"round\" stroke-width=\"1.5\"></rect>\n    <line id=\"Line_323\" data-name=\"Line 323\" x2=\"26.469\" transform=\"translate(1025.988 1134.55)\" fill=\"none\" stroke=\"currentcolor\" stroke-linecap=\"round\" stroke-width=\"1.5\"></line>\n    <line id=\"Line_324\" data-name=\"Line 324\" x2=\"12.4\" transform=\"translate(1031.041 1138.374)\" fill=\"none\" stroke=\"currentcolor\" stroke-linecap=\"round\" stroke-width=\"1.5\"></line>\n    <line id=\"Line_325\" data-name=\"Line 325\" x2=\"16.364\" transform=\"translate(1031.041 1142.115)\" fill=\"none\" stroke=\"currentcolor\" stroke-linecap=\"round\" stroke-width=\"1.5\"></line>\n    <line id=\"Line_326\" data-name=\"Line 326\" x2=\"13.721\" transform=\"translate(1031.041 1145.855)\" fill=\"none\" stroke=\"currentcolor\" stroke-linecap=\"round\" stroke-width=\"1.5\"></line>\n  </g>\n</svg><span>Free Shipping &amp; Returns:</span> On orders above $79</p>"
           }
         },
+        "custom_liquid_GXf3qL": {
+          "type": "custom_liquid",
+          "settings": {
+            "custom_liquid": "<div class=\"book-purchase-wrapper\">\n<!-- 購買按鈕 -->\n<div class=\"book-purchase-item right-align\"><a class=\"btn-tln-shop\" rel=\"noopener noreferrer\" href=\"{{ product.metafields.custom.product_link.value }}\" target=\"_blank\"> 前往購買 </a></div>\n</div>\n<!-- CSS -->\n<style>\n.btn-tln-shop {\n  display: block;\n  width: 100%;\n  padding: 14px 20px;\n  box-sizing: border-box;\n  font-family: system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif;\n  font-size: 16px;\n  font-weight: 500;\n  line-height: 1.4;\n  text-align: center;\n  text-decoration: underline;\n  text-underline-offset: 3px;\n  background-color: #f6e5d8;\n  color: #000000; /* 你原本的 */\n  border-radius: 4px;\n  border: none;\n  transition: background-color 0.2s ease, transform 0.1s ease;\n}\n\n.btn-tln-shop:hover {\n  background-color: #f8e4bf;\n  transform: translateY(-1px);\n}\n\n/* ✅ 强制白字：防主题覆盖/visited 变色 */\n.book-purchase-item .btn-tln-shop,\n.book-purchase-item .btn-tln-shop:visited {\n  color: #000000 !important;\n  -webkit-text-fill-color: #000000;\n}\n\n.book-purchase-item .btn-tln-shop:hover,\n.book-purchase-item .btn-tln-shop:hover:visited {\n  color: #000000 !important;\n  -webkit-text-fill-color: #000000;\n}\n\n/* ✅ 若有 span 包裹文字（更稳） */\n.book-purchase-item .btn-tln-shop * {\n  color: inherit !important;\n  -webkit-text-fill-color: inherit;\n}\n</style>"
+          }
+        },
         "description": {
           "type": "description",
           "settings": {}
@@ -147,6 +153,7 @@
         "d0801597-0373-4cce-9004-cd5ceda4203d",
         "68863399-17f6-4e5b-8b56-6ef125ef3168",
         "23fc8ca2-22ab-4803-9f12-37a2242738b7",
+        "custom_liquid_GXf3qL",
         "description",
         "27623c12-0b97-4758-bdfe-58f4a6a6590f",
         "0bfec2f5-5d58-468c-92f3-9a99aed291fb",
