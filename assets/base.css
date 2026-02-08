@@ -4538,3 +4538,14 @@ predictive-search [open=true] .predictive-search{ display:block;}
         padding-left: 20px !important;
     }
 }
+
+/* 全站特價顏色設定 */
+.price--on-sale .price-item--sale {
+  color: #ff0000 !important; /* 這裡改成你想要的特價顏色 */
+}
+
+/* 全站原價（刪除線）顏色設定 */
+.price--on-sale .price-item--regular {
+  color: #999999 !important; /* 這裡改成你想要的原價顏色 */
+  opacity: 0.8;
+}
