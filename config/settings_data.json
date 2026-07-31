@@ -710,11 +710,11 @@
             "type": "address",
             "settings": {
               "address_heading": "CREDITS",
-              "footer_address": "New York60 Wooster Street \nNew York, NY 10012",
-              "footer_contact_no": "+1 646-853-2411",
-              "footer_address_1": "East Hampton66 Newtown Lane East Hampton, NY 11937",
-              "footer_contact_no_1": "+1 631-800-1334",
-              "footer_contact_id": "ughhkikh",
+              "footer_address": "New York, NY 10012",
+              "footer_contact_no": "",
+              "footer_address_1": "",
+              "footer_contact_no_1": "",
+              "footer_contact_id": "",
               "office_hours": "",
               "alignment": "left"
             }
@@ -946,14 +946,14 @@
         "type": "shopify://apps/inbox/blocks/chat/841fc607-4181-4ad1-842d-e24d7f8bad6b",
         "disabled": false,
         "settings": {
+          "greeting_message": "",
           "button_color": "#f9f9eb",
           "secondary_color": "#ae9747",
           "ternary_color": "#ae9747",
           "button_icon": "chat_bubble",
           "button_text": "chat_with_us",
           "button_horizontal_position": "bottom_left",
-          "button_vertical_position": "lowest",
-          "greeting_message": ""
+          "button_vertical_position": "lowest"
         }
       }
     }
