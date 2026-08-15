@@ -186,6 +186,7 @@
         "blocks": {
           "announcement-bar-0": {
             "type": "announcement",
+            "disabled": true,
             "settings": {
               "text": "Clearance Sale Event: Up to 50% Off Select Items!",
               "link": "shopify://collections/anti-aging-cream"
@@ -193,6 +194,7 @@
           },
           "26a5b632-ccfe-4348-b599-1e87c2b86bce": {
             "type": "announcement",
+            "disabled": true,
             "settings": {
               "text": "Best special offers every week 40% Off! Free delivery time",
               "link": "shopify://collections/creams"
@@ -200,6 +202,7 @@
           },
           "6785f306-a6b1-4f8d-abdc-7f21d70a632f": {
             "type": "announcement",
+            "disabled": true,
             "settings": {
               "text": "Free Shipping on Orders over $140",
               "link": "shopify://collections/face-cream"
@@ -948,8 +951,6 @@
         "settings": {
           "greeting_message": "",
           "button_color": "#f9f9eb",
-          "secondary_color": "#ae9747",
-          "ternary_color": "#ae9747",
           "button_icon": "chat_bubble",
           "button_text": "chat_with_us",
           "button_horizontal_position": "bottom_left",
