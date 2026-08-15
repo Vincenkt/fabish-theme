@@ -138,47 +138,37 @@
           "type": "tab",
           "settings": {
             "collection": "frontpage",
-            "title": "保健品"
+            "title": "早安嚴選"
           }
         },
-        "tab_XTKwYY": {
+        "tab_q69DqK": {
           "type": "tab",
-          "disabled": true,
           "settings": {
-            "collection": "",
-            "title": "Collection name"
-          }
-        },
-        "tab_CCh8PV": {
-          "type": "tab",
-          "disabled": true,
-          "settings": {
-            "collection": "",
-            "title": "Collection name"
+            "collection": "獨家周邊",
+            "title": "獨家周邊"
           }
         }
       },
       "block_order": [
         "tab_7wchDr",
-        "tab_XTKwYY",
-        "tab_CCh8PV"
+        "tab_q69DqK"
       ],
       "custom_css": [],
       "name": "t:sections.product-tab.presets.name",
       "settings": {
         "page_full_width": true,
         "page_full_width_spacing": false,
-        "title": "Featured Collection",
+        "title": "推薦精選",
         "heading_size": "h1",
-        "sub_heading": "Sub Heading",
-        "description": "Use this text to share the information which you like!.",
-        "button_label": "觀看更多",
+        "sub_heading": "早安小舖",
+        "description": "",
+        "button_label": "",
         "button_link": "",
         "button_style_secondary": false,
         "column_alignment": "center",
         "color_scheme": "background-1",
-        "products_to_show": 5,
-        "products_per_row": 3,
+        "products_to_show": 12,
+        "products_per_row": 5,
         "enable_slider": false,
         "enable_dotts": false,
         "enable_arrows": false,
@@ -200,22 +190,21 @@
     },
     "featured_collection_DE6b7T": {
       "type": "featured-collection",
-      "disabled": true,
       "name": "t:sections.featured-collection.presets.name",
       "settings": {
         "page_full_width": false,
         "page_full_width_spacing": false,
-        "title": "周邊版塊",
+        "title": "早安嚴選",
         "heading_size": "h1",
-        "sub_heading": "Sub Heading",
+        "sub_heading": "",
         "description": "",
-        "button_label": "Button label",
+        "button_label": "",
         "button_link": "",
         "button_style_secondary": false,
-        "column_alignment": "center",
-        "collection": "",
-        "products_to_show": 6,
-        "columns_desktop": 3,
+        "column_alignment": "left",
+        "collection": "frontpage",
+        "products_to_show": 10,
+        "columns_desktop": 5,
         "show_view_all": true,
         "view_all_style": "solid",
         "color_scheme": "background-1",
