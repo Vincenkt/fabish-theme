@@ -190,6 +190,7 @@
     },
     "featured_collection_DE6b7T": {
       "type": "featured-collection",
+      "disabled": true,
       "name": "t:sections.featured-collection.presets.name",
       "settings": {
         "page_full_width": false,
