@@ -297,7 +297,6 @@
     },
     "custom_liquid_9JMpAY": {
       "type": "custom-liquid",
-      "disabled": true,
       "custom_css": [],
       "name": "t:sections.custom-liquid.presets.name",
       "settings": {
@@ -353,7 +352,7 @@
         "text": "",
         "deal_end_date": "25 mar 2024",
         "button_label_1": "DONATE NOW",
-        "button_link_1": "https://donorbox.org/goodmorningchina?",
+        "button_link_1": "https://donorbox.org/goodmorningchina",
         "button_style_secondary_1": false,
         "button_label_2": "",
         "button_link_2": "",
