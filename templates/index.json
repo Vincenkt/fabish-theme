@@ -297,6 +297,7 @@
     },
     "custom_liquid_9JMpAY": {
       "type": "custom-liquid",
+      "disabled": true,
       "custom_css": [],
       "name": "t:sections.custom-liquid.presets.name",
       "settings": {
