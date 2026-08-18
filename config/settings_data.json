@@ -308,7 +308,7 @@
           "logo": "shopify://shop_images/logo_1bb66c58-dcfa-4c0d-b5d1-d32515995eb5.png",
           "logo_width": 140,
           "logo_position": "middle-left",
-          "menu": "main-menu",
+          "menu": "link-list",
           "menu_alignment": "center",
           "mobile_screen_width": "1220",
           "show_line_separator": true,
