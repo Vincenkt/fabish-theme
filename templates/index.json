@@ -370,15 +370,15 @@
         "heading_cCqqeN": {
           "type": "heading",
           "settings": {
-            "heading": "訂閱我們",
-            "heading_size": "h1"
+            "heading": "訂閱我們 - 掌握最新優惠",
+            "heading_size": "h2"
           }
         },
         "paragraph_VyiDAL": {
           "type": "paragraph",
           "settings": {
-            "text": "<p>Be the first to know when we launch.</p>",
-            "text_style": "subtitle"
+            "text": "",
+            "text_style": "body"
           }
         },
         "email_form_MBKgX4": {
