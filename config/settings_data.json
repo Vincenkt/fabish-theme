@@ -684,8 +684,8 @@
           "3d388e38-c98c-4234-89f3-84dfe340d3f7": {
             "type": "link_list",
             "settings": {
-              "heading": "SHOP",
-              "menu": "",
+              "heading": "早安商店",
+              "menu": "link-list-1",
               "alignment": "left"
             }
           },
