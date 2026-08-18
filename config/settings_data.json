@@ -460,7 +460,7 @@
           "image_W6PaQM"
         ],
         "settings": {
-          "display_recent_purchase": true,
+          "display_recent_purchase": false,
           "placement": "right",
           "text": "Someone purchased"
         }
@@ -665,6 +665,7 @@
         "blocks": {
           "99c35259-1f09-45c0-8575-1a58e47c7b91": {
             "type": "text",
+            "disabled": true,
             "settings": {
               "image_width": 160,
               "heading": "",
@@ -675,6 +676,7 @@
           },
           "3d388e38-c98c-4234-89f3-84dfe340d3f7": {
             "type": "link_list",
+            "disabled": true,
             "settings": {
               "heading": "早安商店",
               "menu": "link-list-1",
@@ -695,10 +697,10 @@
             "disabled": true,
             "settings": {
               "sub_heading": "",
-              "heading": "Get Active",
-              "newsletter_subtext": "<p>The ideal way to stay in contact and learn about our exclusive offers.</p>",
-              "newsletter_subtext_privacy": "<p>By subscribing to Get Special Discount!</p>",
-              "alignment": "left",
+              "heading": "訂閱我們 - 掌握最新優惠",
+              "newsletter_subtext": "",
+              "newsletter_subtext_privacy": "",
+              "alignment": "center",
               "enable_socialicon": false
             }
           },
