@@ -663,6 +663,22 @@
       "footer_style3": {
         "type": "footer_style3",
         "blocks": {
+          "link_list_9CWPEQ": {
+            "type": "link_list",
+            "settings": {
+              "heading": "支持早安中國",
+              "menu": "link-list-1",
+              "alignment": "center"
+            }
+          },
+          "link_list_3aT4zB": {
+            "type": "link_list",
+            "settings": {
+              "heading": "網站政策",
+              "menu": "link-list-2",
+              "alignment": "center"
+            }
+          },
           "99c35259-1f09-45c0-8575-1a58e47c7b91": {
             "type": "text",
             "disabled": true,
@@ -720,6 +736,8 @@
           }
         },
         "block_order": [
+          "link_list_9CWPEQ",
+          "link_list_3aT4zB",
           "99c35259-1f09-45c0-8575-1a58e47c7b91",
           "3d388e38-c98c-4234-89f3-84dfe340d3f7",
           "bd11441b-83e5-4381-bcc2-4a9431cfe4d7",
