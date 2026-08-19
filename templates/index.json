@@ -363,6 +363,67 @@
         "custom_class_name": "custom-deal-banner"
       }
     },
+    "custom_liquid_awcp9A": {
+      "type": "custom-liquid",
+      "name": "t:sections.custom-liquid.presets.name",
+      "settings": {
+        "page_full_width": false,
+        "page_full_width_spacing": false,
+        "title": "",
+        "heading_size": "h1",
+        "sub_heading": "",
+        "description": "",
+        "button_label": "",
+        "button_link": "",
+        "button_style_secondary": false,
+        "column_alignment": "center",
+        "custom_liquid": "",
+        "color_scheme": "background-1",
+        "padding_top": 40,
+        "padding_bottom": 52
+      }
+    },
+    "custom_liquid_Vd6AKc": {
+      "type": "custom-liquid",
+      "name": "t:sections.custom-liquid.presets.name",
+      "settings": {
+        "page_full_width": false,
+        "page_full_width_spacing": false,
+        "title": "",
+        "heading_size": "h1",
+        "sub_heading": "",
+        "description": "",
+        "button_label": "",
+        "button_link": "",
+        "button_style_secondary": false,
+        "column_alignment": "center",
+        "custom_liquid": "",
+        "color_scheme": "background-1",
+        "padding_top": 40,
+        "padding_bottom": 52
+      }
+    },
+    "17871495008c2a1321": {
+      "type": "apps",
+      "blocks": {
+        "youtube_gallery_carousel_widget_block_RGreBR": {
+          "type": "shopify://apps/youtube-gallery/blocks/carousel-widget-block/20730f6a-6b3e-4beb-9cbf-452a9ade13e3",
+          "settings": {
+            "contentIndex": "1",
+            "themeId": "light",
+            "autoscroll": true,
+            "autoplay": "off",
+            "focus": true
+          }
+        }
+      },
+      "block_order": [
+        "youtube_gallery_carousel_widget_block_RGreBR"
+      ],
+      "settings": {
+        "include_margins": true
+      }
+    },
     "newsletter_rgAtDr": {
       "type": "newsletter",
       "blocks": {
@@ -409,6 +470,9 @@
     "custom_liquid_9JMpAY",
     "contact_form_UEHhaL",
     "deal_banner_aXn6CT",
+    "custom_liquid_awcp9A",
+    "17871495008c2a1321",
+    "custom_liquid_Vd6AKc",
     "newsletter_rgAtDr"
   ]
 }
