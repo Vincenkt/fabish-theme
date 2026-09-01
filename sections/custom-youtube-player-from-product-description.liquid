@@ -27,6 +27,14 @@
 
 {% assign yt_id = yt_id | strip %}
 
+<style>
+  #shopify-section-{{ section.id }} .yt-section-spacing-{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+</style>
+
+<div class="yt-section-spacing-{{ section.id }}">
 {% if yt_id != blank %}
 <div class="yt-shell">
   <div class="yt-wrap" id="ytWrap-{{ section.id }}">
@@ -433,6 +441,7 @@ function syncMuteButton(){
     請在商品的「說明」欄位輸入 YouTube 影片 ID 或網址。
   </div>
 {% endif %}
+</div>
 
 {% schema %}
 {
@@ -449,6 +458,30 @@ function syncMuteButton(){
       "id": "max_width",
       "label": "最大寬度（例如 900px 或 100%）",
       "default": "900px"
+    },
+    {
+      "type": "header",
+      "content": "區段邊框間距"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "頂端邊框間距",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "底部邊框間距",
+      "default": 0
     }
     
   ],
