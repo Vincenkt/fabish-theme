@@ -205,6 +205,34 @@
         "show_quantity_selector": true
       }
     },
+    "custom_youtube_player_from_product_description_FXEFht": {
+      "type": "custom-youtube-player-from-product-description",
+      "name": "自訂 YouTube 播放器 from 商品描述欄",
+      "settings": {
+        "notice_text": "<p>⚠️如您遇到驗證問題，請前往<a href=\"https://www.youtube.com/\" target=\"_blank\">YouTube</a>登入後，回此頁面重新整理即可繼續觀看。</p>",
+        "max_width": "900px"
+      }
+    },
+    "custom_liquid_ciLRg6": {
+      "type": "custom-liquid",
+      "name": "t:sections.custom-liquid.presets.name",
+      "settings": {
+        "page_full_width": false,
+        "page_full_width_spacing": false,
+        "title": "",
+        "heading_size": "h1",
+        "sub_heading": "",
+        "description": "",
+        "button_label": "",
+        "button_link": "",
+        "button_style_secondary": false,
+        "column_alignment": "center",
+        "custom_liquid": "",
+        "color_scheme": "background-1",
+        "padding_top": 40,
+        "padding_bottom": 0
+      }
+    },
     "product-recommendations": {
       "type": "product-recommendations",
       "settings": {
@@ -248,20 +276,13 @@
         "page_full_width": false,
         "prev_next_products": true
       }
-    },
-    "custom_youtube_player_from_product_description_FXEFht": {
-      "type": "custom-youtube-player-from-product-description",
-      "name": "自訂 YouTube 播放器 from 商品描述欄",
-      "settings": {
-        "notice_text": "<p>⚠️如您遇到驗證問題，請前往<a href=\"https://www.youtube.com/\" target=\"_blank\">YouTube</a>登入後，回此頁面重新整理即可繼續觀看。</p>",
-        "max_width": "900px"
-      }
     }
   },
   "order": [
     "2246be81-f016-4af3-a46e-0b3d46f7e978",
     "main",
     "custom_youtube_player_from_product_description_FXEFht",
+    "custom_liquid_ciLRg6",
     "product-recommendations",
     "1700121402aa445ab6",
     "product-next-prev-navigation"
