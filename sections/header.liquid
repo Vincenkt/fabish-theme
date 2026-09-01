@@ -744,7 +744,7 @@ display: inline-flex;
          </span>
        </a>
         {% else %}
-       <a href="#" class="header__icon header__icon--account link focus-inset{% if section.settings.menu != blank %} small-hide{% endif %}">
+       <a href="{{ routes.storefront_login_url }}" class="header__icon header__icon--account link focus-inset{% if section.settings.menu != blank %} small-hide{% endif %}" rel="nofollow">
        {% render 'icon-account' %}
           <span class="icon__fallback-text {% if section.settings.header_icon_type =="icon"  %} hidden {% endif %}">
             {{ 'customer.log_in' | t }}              
