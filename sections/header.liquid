@@ -167,7 +167,7 @@
          header .tag.hot, header .tag.sale, header .tag.new{position:relative;left:10px;} 
         header ul.dt-sc-list-inline>li ul.sub-menu-lists>li>ul a .tag{top:0;}
         header .search-box.search-box-hide{display:none;}
-        a.header__icon.header__icon--account.link.focus-inset.small-hide,
+        a.header__icon.header__icon--account-link.link.focus-inset.small-hide,
          header .header__icons   localization-form{display:none}
        /* a.header__icon:not(:last-child) {margin-left: 2.5rem;} 
     a.header__icon:not(:last-child),
@@ -744,7 +744,7 @@ display: inline-flex;
          </span>
        </a>
         {% else %}
-       <a href="{{ routes.storefront_login_url }}" class="header__icon header__icon--account link focus-inset{% if section.settings.menu != blank %} small-hide{% endif %}" rel="nofollow">
+       <a href="{{ routes.storefront_login_url }}" class="header__icon header__icon--account-link link focus-inset{% if section.settings.menu != blank %} small-hide{% endif %}" rel="nofollow">
        {% render 'icon-account' %}
           <span class="icon__fallback-text {% if section.settings.header_icon_type =="icon"  %} hidden {% endif %}">
             {{ 'customer.log_in' | t }}              
