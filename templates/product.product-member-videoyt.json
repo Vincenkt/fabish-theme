@@ -15,7 +15,6 @@
         "page_full_width": true,
         "page_full_width_spacing": true,
         "use_breadcrumb_title": true,
-        "breadcrumb_image": "shopify://shop_images/about-breadcrumb-1.jpg",
         "breadcrumb_style": "center",
         "image_overlay_opacity": 60,
         "color_scheme": "background-2",
@@ -152,6 +151,7 @@
         "3f7d416a-1acc-4807-845a-a90b79a879f9",
         "8b614703-5d11-4efc-b5d0-e7e014e4d422"
       ],
+      "disabled": true,
       "settings": {
         "page_full_width": false,
         "page_full_width_spacing": false,
@@ -236,6 +236,7 @@
     },
     "1700121402aa445ab6": {
       "type": "apps",
+      "disabled": true,
       "settings": {
         "include_margins": true
       }
