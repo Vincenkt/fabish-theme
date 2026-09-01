@@ -1,0 +1,460 @@
+{% comment %}
+  sections/custom-youtube-player.liquid
+  - 支援一般影片與直播
+  - 直播：靜音自動播 → 偵測播放後嘗試自動取消靜音；若失敗顯示「開聲音」鈕
+  - 直播：YouTube 風格 LIVE 標籤常駐、時間軸隱藏、控制列常駐
+{% endcomment %}
+
+{% assign raw_input = section.settings.youtube_input %}
+{% assign id_from_setting = raw_input %}
+
+{%- comment -%} 支援貼完整 YouTube URL，自動抽出 ID {%- endcomment -%}
+{% if id_from_setting contains 'watch?v=' %}
+  {% assign id_from_setting = id_from_setting | split: 'watch?v=' | last | split: '&' | first %}
+{% elsif id_from_setting contains 'youtu.be/' %}
+  {% assign id_from_setting = id_from_setting | split: 'youtu.be/' | last | split: '?' | first %}
+{% endif %}
+
+{%- comment -%} 若區段未填，改用產品 metafield: custom.youtube_id {%- endcomment -%}
+{% assign yt_id = id_from_setting %}
+{% if yt_id == blank and product and product.metafields.custom.youtube_id %}
+  {% assign yt_id = product.metafields.custom.youtube_id.value %}
+{% endif %}
+
+{% if yt_id != blank %}
+<div class="yt-shell">
+  <div class="yt-wrap" id="ytWrap-{{ section.id }}">
+    <iframe
+      id="ytPlayer-{{ section.id }}"
+      src="https://www.youtube.com/embed/{{ yt_id }}?enablejsapi=1&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&fs=1&playsinline=1"
+      title="Member Video"
+      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+      allowfullscreen
+    ></iframe>
+
+    <!-- 保護層（接收滑鼠事件，避免點到 iframe 原生控制） -->
+    <div class="yt-guard" aria-hidden="true"></div>
+
+    <!-- 控制列 -->
+    <div class="yt-overlay" id="ytOverlay-{{ section.id }}">
+      <div class="yt-controls">
+        <div id="playHint-{{ section.id }}" class="play-hint">點我播放</div>
+        <button class="icon-btn" id="btnPlay-{{ section.id }}" aria-label="播放/暫停" title="播放/暫停">
+          <span class="icon" data-play="▶" data-pause="⏸">▶</span>
+        </button>
+
+        <button class="icon-btn" id="btnMute-{{ section.id }}" aria-label="靜音/取消靜音" title="靜音/取消靜音">
+          <span class="icon" data-mute="🔇" data-unmute="🔊">🔇</span>
+        </button>
+
+        <button class="icon-btn" id="btnSpeedDown-{{ section.id }}" title="減速">
+          <span class="icon">«</span>
+        </button>
+
+        <span id="speedDisplay-{{ section.id }}" style="font-size: 14px; min-width: 40px; text-align: center;">1x</span>
+
+        <button class="icon-btn" id="btnSpeedUp-{{ section.id }}" title="加速">
+          <span class="icon">»</span>
+        </button>
+
+        <button class="icon-btn" id="btnFs-{{ section.id }}" aria-label="全螢幕/關閉全螢幕" title="全螢幕">
+          <span class="icon" data-enter="⛶" data-exit="🞬">⛶</span>
+        </button>
+
+        <!-- 🔊 直播且仍靜音時顯示，一鍵開聲音 -->
+        <button class="yt-unmute-hint" id="btnUnmute-{{ section.id }}" type="button" aria-label="開聲音" title="開聲音" style="display:none;">
+          🔊 開聲音
+        </button>
+
+        <!-- 🔴 YouTube 風格 LIVE 標籤（直播時顯示） -->
+        <span class="yt-live-chip" id="ytLiveChip-{{ section.id }}">
+          <span class="dot"></span> 直播中
+        </span>
+      </div>
+
+      <!-- 時間軸（直播會隱藏） -->
+      <input id="seekBar-{{ section.id }}" class="yt-seek" type="range" min="0" max="0" step="0.1" value="0" aria-label="拖曳調整時間" />
+    </div>
+  </div>
+
+
+        {%- if section.settings.notice_text != blank -%}
+        <div class="ytp-notice">
+          {{ section.settings.notice_text }}
+        </div>
+      {%- endif -%}
+</div>
+
+<style>
+/* 外框與容器 */
+.yt-shell{max-width:{{ section.settings.max_width }};margin:0 auto;}
+.yt-wrap{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000;}
+.yt-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none;z-index:1;}
+.yt-guard{position:absolute;inset:0;z-index:2;pointer-events:auto;}
+
+/* 控制列 */
+.yt-overlay{
+  position:absolute;left:0;right:0;bottom:0;height:25%;
+  display:flex;flex-direction:column;justify-content:flex-end;gap:10px;padding:12px;
+  background:linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0));
+  z-index:3;color:#fff;transition:opacity .25s ease;
+}
+.yt-overlay.hidden{opacity:0; pointer-events:none;}
+.yt-controls{display:flex;gap:10px;align-items:center;}
+.icon-btn{width:44px;height:44px;border-radius:999px;border:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.18);color:#fff;cursor:pointer;}
+.icon-btn:hover{background:rgba(255,255,255,.28);}
+.icon-btn .icon{font-size:20px;line-height:1;}
+.yt-seek{-webkit-appearance:none;appearance:none;width:100%;height:6px;background:rgba(255,255,255,.35);border-radius:999px;outline:none;cursor:pointer;}
+.yt-seek::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;border:none;box-shadow:0 0 0 2px rgba(0,0,0,.25);}
+.yt-seek::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff;border:none;}
+
+.play-hint {
+  position: absolute;
+  bottom: 60px; /* 位於播放按鈕上方 */
+  left: 12px;
+  background: #ff0000;
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: bold;
+  display: none; /* 預設隱藏，由 JS 控制 */
+  z-index: 10;
+}
+/* 加上小箭頭指示 */
+.play-hint::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 15px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #ff0000 transparent transparent transparent;
+}
+
+/* 直播樣式：時間軸隱藏、控制列縮小常駐 */
+.yt-wrap.is-live .yt-seek{display:none;}
+.yt-wrap.is-live .yt-overlay{height:14%;padding:8px;}
+
+/* 🔴 YouTube 風格 LIVE 標籤 */
+.yt-live-chip{
+  display:none; /* 由 JS 控制直播時顯示 */
+  margin-left:8px;
+  padding:6px 10px;
+  background:#f00;
+  color:#fff;
+  font-weight:700;
+  font-size:14px;
+  border-radius:999px;
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.15) inset;
+  pointer-events:none;
+}
+.yt-live-chip .dot{
+  width:8px;height:8px;border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(255,255,255,.25);
+}
+
+/* 🔊 開聲音膠囊鈕（直播且仍靜音時顯示） */
+.yt-unmute-hint{
+  display:none;
+  padding:6px 10px;
+  background:#fff;
+  color:#000;
+  border:0;
+  border-radius:999px;
+  font-weight:700;
+  font-size:14px;
+  cursor:pointer;
+}
+.yt-unmute-hint:hover{ filter:brightness(0.92); }
+
+.play-hint {
+    /* ... 既有樣式 ... */
+    pointer-events: none; /* 防止擋到點擊事件 */
+    transition: opacity 0.2s ease;
+}
+
+/* 全螢幕修正 */
+.yt-wrap:fullscreen,
+.yt-wrap:-webkit-full-screen,
+.yt-wrap:-moz-full-screen,
+.yt-wrap:-ms-fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  border-radius: 0 !important;
+}
+.yt-wrap:fullscreen iframe,
+.yt-wrap:-webkit-full-screen iframe,
+.yt-wrap:-moz-full-screen iframe,
+.yt-wrap:-ms-fullscreen iframe {
+  width: 100vw !important;
+  height: 100vh !important;
+}
+.yt-wrap:fullscreen .yt-overlay,
+.yt-wrap:-webkit-full-screen .yt-overlay,
+.yt-wrap:-moz-full-screen .yt-overlay,
+.yt-wrap:-ms-fullscreen .yt-overlay {
+  height: 18%;
+  padding: 16px;
+}
+.yt-wrap:fullscreen .icon-btn{width:48px;height:48px;}
+
+  .ytp-notice{
+    margin-top:16px;
+    margin-bottom:0;
+    font-size:18px;
+    line-height:1.6;
+    color:#333;
+    background:#f8f9fa;
+    border:1px solid #e7e7e7;
+    border-radius:10px;
+    padding:48px 14px;
+  }
+  .ytp-notice p{
+    margin:0;
+  }
+  .ytp-notice a,
+  .ytp-notice a:visited{
+    color:#ff0000 !important;
+    font-weight:600;
+    text-decoration:underline;
+    text-underline-offset:2px;
+  }
+  .ytp-notice a:hover{
+    color:#cc0000 !important;
+  }
+</style>
+
+<script>
+(function(){
+  if(!(window.YT && window.YT.Player)){
+    var s=document.createElement('script'); s.src="https://www.youtube.com/iframe_api"; document.head.appendChild(s);
+  }
+
+  var pid = "{{ section.id }}";
+  var player, btnPlay, btnMute, btnUnmute, seekBar, overlay, wrap, liveChip;
+  var progressTimer=null, isSeeking=false, hover=false, liveCheckTimer=null;
+
+  function isLive(){
+    if(!player) return false;
+    var dur = player.getDuration() || 0;
+    if(dur === 0) return true;
+    try{
+      var t = (player.getVideoData && player.getVideoData().title) || "";
+      if(/LIVE|直播/i.test(t)) return true;
+    }catch(e){}
+    return false;
+  }
+
+  function init(){
+    btnPlay   = document.getElementById("btnPlay-"+pid);
+    btnMute   = document.getElementById("btnMute-"+pid);
+    btnUnmute = document.getElementById("btnUnmute-"+pid);
+    seekBar   = document.getElementById("seekBar-"+pid);
+    overlay   = document.getElementById("ytOverlay-"+pid);
+    wrap      = document.getElementById("ytWrap-"+pid);
+    liveChip  = document.getElementById("ytLiveChip-"+pid);
+
+    // 播放/暫停：純粹化控制，不干涉音量
+    btnPlay.addEventListener('click', function(){
+      var st = player.getPlayerState();
+      if(st === YT.PlayerState.PLAYING){ 
+        player.pauseVideo(); 
+      } else { 
+        player.playVideo(); 
+      }
+    });
+
+    // 音量按鈕：手動切換並即時更新圖示
+    btnMute.addEventListener('click', function(){
+      if(player.isMuted()) {
+        player.unMute();
+      } else {
+        player.mute();
+      }
+      syncMuteButton(); // 立即同步圖示
+    });
+
+    if(btnUnmute) btnUnmute.addEventListener('click', function(){
+      player.unMute();
+      syncMuteButton();
+    });
+
+    // 速度與進度條邏輯
+    var btnSpeedUp = document.getElementById("btnSpeedUp-" + pid);
+    var btnSpeedDown = document.getElementById("btnSpeedDown-" + pid);
+    var speedDisplay = document.getElementById("speedDisplay-" + pid);
+    var speeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+    function updateSpeed(delta) {
+      var currentRate = player.getPlaybackRate();
+      var currentIndex = speeds.indexOf(currentRate);
+      if (currentIndex === -1) currentIndex = 3;
+      var newIndex = Math.min(Math.max(currentIndex + delta, 0), speeds.length - 1);
+      var newRate = speeds[newIndex];
+      player.setPlaybackRate(newRate);
+      speedDisplay.textContent = newRate + "x";
+    }
+    if(btnSpeedUp) btnSpeedUp.addEventListener('click', function() { updateSpeed(1); });
+    if(btnSpeedDown) btnSpeedDown.addEventListener('click', function() { updateSpeed(-1); });
+
+    var btnFs = document.getElementById("btnFs-"+pid);
+    if(btnFs) btnFs.addEventListener('click', toggleFullscreen);
+
+    seekBar.addEventListener('input', function(){ isSeeking = true; });
+    seekBar.addEventListener('change', function(){
+      player.seekTo(seekBar.value);
+      isSeeking = false;
+    });
+
+    wrap.addEventListener('mouseenter', ()=>{ hover=true; updateControlsVisibility(); });
+    wrap.addEventListener('mouseleave', ()=>{ hover=false; updateControlsVisibility(); });
+  }
+
+function onPlayerReady() {
+    var live = isLive();
+    var hint = document.getElementById("playHint-" + pid);
+
+    if (live) {
+      player.mute();
+      player.playVideo();
+    } else {
+      player.unMute();
+      player.setVolume(100);
+      
+      if (hint) {
+        hint.style.display = 'block';
+        hint.style.opacity = '1';
+      }
+    }
+    
+    syncMuteButton();
+    syncDuration();
+    updateControlsVisibility();
+    startLiveCheckTimer();
+    // 修正: 確保全螢幕圖示同步函式存在或移除呼叫
+    if (typeof syncFullscreenIcon === 'function') syncFullscreenIcon();
+  }
+
+  function onPlayerStateChange(e) {
+    const isPlaying = (e.data === YT.PlayerState.PLAYING);
+    
+    var icon = btnPlay.querySelector('.icon');
+    icon.textContent = icon.getAttribute(isPlaying ? 'data-pause' : 'data-play');
+    
+    var hint = document.getElementById("playHint-" + pid);
+    if (hint) {
+      hint.style.display = isPlaying ? 'none' : 'block';
+    }
+
+    if (isPlaying) {
+      startProgressTimer();
+    } else {
+      stopProgressTimer();
+    }
+    
+    // 每次狀態改變都確認一次靜音圖示是否正確
+    syncMuteButton();
+    updateControlsVisibility();
+  }
+
+  window.onYouTubeIframeAPIReady = function(){
+    player = new YT.Player("ytPlayer-"+pid, {
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange
+      }
+    });
+    init();
+  };
+
+  function updateControlsVisibility(){
+    if(!player) return;
+    var st = player.getPlayerState();
+    var shouldShow = isLive() || (st !== YT.PlayerState.PLAYING) || hover;
+    overlay.classList.toggle('hidden', !shouldShow);
+  }
+
+  function startProgressTimer(){
+    if(progressTimer) clearInterval(progressTimer);
+    progressTimer = setInterval(function(){
+      if(!player || isSeeking) return;
+      seekBar.value = player.getCurrentTime();
+      seekBar.max = player.getDuration();
+    }, 500);
+  }
+  function stopProgressTimer(){ clearInterval(progressTimer); }
+
+// 強化版靜音同步：加入微小延遲確保抓到 API 更新後的狀態值
+function syncMuteButton(){
+  if(!player) return;
+  setTimeout(function() {
+    var icon = btnMute.querySelector('.icon');
+    var isMuted = player.isMuted();
+    icon.textContent = icon.getAttribute(isMuted ? 'data-mute' : 'data-unmute');
+  }, 50);
+}
+
+  function syncDuration(){
+    var live = isLive();
+    wrap.classList.toggle('is-live', live);
+    if (liveChip) liveChip.style.display = live ? 'inline-flex' : 'none';
+  }
+  function startLiveCheckTimer(){ liveCheckTimer=setInterval(syncDuration, 2000); }
+
+  function isFullscreen(){ return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement); }
+  function toggleFullscreen(){
+    if (!isFullscreen()){
+      if (wrap.requestFullscreen) wrap.requestFullscreen();
+      else if (wrap.webkitRequestFullscreen) wrap.webkitRequestFullscreen();
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+    }
+  }
+})();
+</script>
+
+
+{% else %}
+  <div style="padding:12px;background:#fff3cd;border-radius:8px;">
+    請在區塊設定輸入 YouTube 影片 ID（或綁定產品 Metafield：<code>custom.youtube_id</code>）。
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "自訂 YouTube 播放器（可直播）",
+  "settings": [
+    {
+      "type": "text",
+      "id": "youtube_input",
+      "label": "YouTube 影片 ID 或 URL（可綁定 Metafield）",
+      "default": "DEMO_ID",
+      "info": "建議填 ID，例如 0WBY8vPYYOs；也支援貼 Watch/Short URL 會自動轉成 ID"
+    },
+    {
+      "type": "richtext",
+      "id": "notice_text",
+      "label": "底部提醒文字",
+      "default": "<p>⚠️如您遇到驗證問題，請前往<a href=\"https://www.youtube.com/\" target=\"_blank\">YouTube</a>登入後，回此頁面重新整理即可繼續觀看。</p>"
+    },
+    {
+      "type": "text",
+      "id": "max_width",
+      "label": "最大寬度（例如 900px 或 100%）",
+      "default": "900px"
+    }
+    
+  ],
+  "presets": [
+    { "name": "自訂 YouTube 播放器" }
+  ]
+}
+{% endschema %}
