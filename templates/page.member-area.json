@@ -19,6 +19,26 @@
         "padding_bottom": 40
       }
     },
+    "custom_liquid_b7PryG": {
+      "type": "custom-liquid",
+      "name": "t:sections.custom-liquid.presets.name",
+      "settings": {
+        "page_full_width": false,
+        "page_full_width_spacing": false,
+        "title": "介紹會員網站",
+        "heading_size": "h1",
+        "sub_heading": "Sub Heading",
+        "description": "Use This Text To Share The Information Which You Like!.",
+        "button_label": "Button label",
+        "button_link": "",
+        "button_style_secondary": false,
+        "column_alignment": "center",
+        "custom_liquid": "",
+        "color_scheme": "background-1",
+        "padding_top": 40,
+        "padding_bottom": 52
+      }
+    },
     "collection_list_XkNPTz": {
       "type": "collection-list",
       "blocks": {
@@ -93,10 +113,74 @@
         "arrow_on_mobile": false,
         "columns_mobile": "1"
       }
+    },
+    "custom_liquid_QwwDXn": {
+      "type": "custom-liquid",
+      "name": "t:sections.custom-liquid.presets.name",
+      "settings": {
+        "page_full_width": false,
+        "page_full_width_spacing": false,
+        "title": "第三區塊是什麼？",
+        "heading_size": "h1",
+        "sub_heading": "Sub Heading",
+        "description": "Use This Text To Share The Information Which You Like!.",
+        "button_label": "Button label",
+        "button_link": "",
+        "button_style_secondary": false,
+        "column_alignment": "center",
+        "custom_liquid": "",
+        "color_scheme": "background-1",
+        "padding_top": 40,
+        "padding_bottom": 52
+      }
+    },
+    "custom_liquid_dp9WRX": {
+      "type": "custom-liquid",
+      "name": "t:sections.custom-liquid.presets.name",
+      "settings": {
+        "page_full_width": false,
+        "page_full_width_spacing": false,
+        "title": "聯繫我們",
+        "heading_size": "h1",
+        "sub_heading": "Sub Heading",
+        "description": "Use This Text To Share The Information Which You Like!.",
+        "button_label": "Button label",
+        "button_link": "",
+        "button_style_secondary": false,
+        "column_alignment": "center",
+        "custom_liquid": "",
+        "color_scheme": "background-1",
+        "padding_top": 40,
+        "padding_bottom": 52
+      }
+    },
+    "custom_liquid_LCHN8K": {
+      "type": "custom-liquid",
+      "name": "t:sections.custom-liquid.presets.name",
+      "settings": {
+        "page_full_width": false,
+        "page_full_width_spacing": false,
+        "title": "特殊活動",
+        "heading_size": "h1",
+        "sub_heading": "Sub Heading",
+        "description": "Use This Text To Share The Information Which You Like!.",
+        "button_label": "Button label",
+        "button_link": "",
+        "button_style_secondary": false,
+        "column_alignment": "center",
+        "custom_liquid": "",
+        "color_scheme": "background-1",
+        "padding_top": 40,
+        "padding_bottom": 52
+      }
     }
   },
   "order": [
     "main",
-    "collection_list_XkNPTz"
+    "custom_liquid_b7PryG",
+    "collection_list_XkNPTz",
+    "custom_liquid_QwwDXn",
+    "custom_liquid_dp9WRX",
+    "custom_liquid_LCHN8K"
   ]
 }
