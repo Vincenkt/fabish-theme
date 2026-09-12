@@ -11,11 +11,11 @@
   "sections": {
     "2246be81-f016-4af3-a46e-0b3d46f7e978": {
       "type": "breadcrumb",
+      "disabled": true,
       "settings": {
         "page_full_width": true,
         "page_full_width_spacing": true,
         "use_breadcrumb_title": true,
-        "breadcrumb_image": "shopify://shop_images/about-breadcrumb-1.jpg",
         "breadcrumb_style": "center",
         "image_overlay_opacity": 60,
         "color_scheme": "background-2",
@@ -152,6 +152,7 @@
         "3f7d416a-1acc-4807-845a-a90b79a879f9",
         "8b614703-5d11-4efc-b5d0-e7e014e4d422"
       ],
+      "disabled": true,
       "settings": {
         "page_full_width": false,
         "page_full_width_spacing": false,
@@ -207,6 +208,7 @@
     },
     "product-recommendations": {
       "type": "product-recommendations",
+      "disabled": true,
       "settings": {
         "page_full_width": true,
         "page_full_width_spacing": false,
@@ -236,19 +238,35 @@
     },
     "1700121402aa445ab6": {
       "type": "apps",
+      "disabled": true,
       "settings": {
         "include_margins": true
       }
     },
     "product-next-prev-navigation": {
       "type": "product-next-prev-navigation",
+      "disabled": true,
       "settings": {
         "page_full_width": false,
         "prev_next_products": true
       }
+    },
+    "custom_youtube_playlist_U3Wjex": {
+      "type": "custom-youtube-playlist",
+      "name": "YT播放器＋播放清單",
+      "settings": {
+        "section_pad_top": 36,
+        "section_pad_bottom": 36,
+        "title_margin_top": 0,
+        "title_margin_bottom": 16,
+        "notice_text": "<p>📌 操作提醒：可點右側清單切換集數；播放器會自動記憶你上次看到的進度。<br/>⚠️蘋果系統原生限制，無法全螢幕顯示，敬請見諒！<br/>⚠️如您遇到驗證問題，請前往<a href=\"https://www.youtube.com/\" target=\"_blank\">YouTube</a>登入後，回此頁面重新整理即可繼續觀看。</p>",
+        "notice_margin_top": 16,
+        "notice_margin_bottom": 0
+      }
     }
   },
   "order": [
+    "custom_youtube_playlist_U3Wjex",
     "2246be81-f016-4af3-a46e-0b3d46f7e978",
     "main",
     "product-recommendations",
