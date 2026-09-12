@@ -1,0 +1,1023 @@
+{% comment %}
+  sections/custom-youtube-player.liquid
+  ✅ 支援一般影片與直播
+  ✅ 直播：靜音自動播 → 偵測播放後嘗試自動取消靜音；若失敗顯示「開聲音」鈕
+  ✅ 直播：YouTube 風格 LIVE 標籤常駐、時間軸隱藏、控制列常駐
+  ✅ 右側播放清單：可點選、播完下一支、記憶進度
+  ✅ 改進：播放清單來源統一「從 DOM 讀」，支援 product metafield 行清單 / blocks
+
+  ✅ 新增（不動播放器內部）：
+  - Section 上下間距可調
+  - 影片上方標題：商品名稱 - 共X集（X 自動計算）
+  - 影片下方提醒文字區塊（可調上下間距）
+  - 手機版：播放清單高度由 schema 設定，不再用 JS 綁影片高度
+
+  ✅ iOS 全螢幕：
+  - iOS Safari 不支援 div fullscreen
+  - 改採「點自訂全螢幕 → 開右下角破口 → 點 YouTube 原生全螢幕」
+  - 除了右下角洞，其餘區域全程不可點擊（維持你的需求）
+{% endcomment %}
+
+{%- assign playlist_text = '' -%}
+{%- if product and product.metafields.custom.youtube_list -%}
+  {%- assign playlist_text = product.metafields.custom.youtube_list.value | default: product.metafields.custom.youtube_list -%}
+{%- endif -%}
+
+{%- assign playlist_lines = '' -%}
+{%- if playlist_text != blank -%}
+  {%- assign playlist_lines = playlist_text | newline_to_br | split: '<br />' -%}
+{%- endif -%}
+
+{% assign has_blocks = false %}
+{% if section.blocks.size > 0 %}
+  {% assign has_blocks = true %}
+{% endif %}
+
+{% comment %}
+  是否顯示這個 section：
+  - 只要有 playlist_lines / blocks 其中一種，就顯示
+{% endcomment %}
+{% assign should_show = false %}
+{% if playlist_lines != blank %}
+  {% assign should_show = true %}
+{% elsif has_blocks %}
+  {% assign should_show = true %}
+{% endif %}
+
+{%- comment -%} ===== 計算集數：優先 playlist_lines(非空行) → blocks ===== {%- endcomment -%}
+{% assign ep_count = 0 %}
+{% if playlist_lines != blank and playlist_lines.size > 0 %}
+  {% for line in playlist_lines %}
+    {% assign row = line | strip %}
+    {% if row != blank %}
+      {% assign ep_count = ep_count | plus: 1 %}
+    {% endif %}
+  {% endfor %}
+{% elsif has_blocks %}
+  {% assign ep_count = section.blocks.size %}
+{% endif %}
+
+{% if should_show %}
+
+<section
+  class="ytp-section"
+  style="
+    padding-top: {{ section.settings.section_pad_top }}px;
+    padding-bottom: {{ section.settings.section_pad_bottom }}px;
+  "
+>
+  <div class="page-width">
+
+    {%- if product -%}
+      <h2
+        class="ytp-title"
+        style="
+          margin-top: {{ section.settings.title_margin_top }}px;
+          margin-bottom: {{ section.settings.title_margin_bottom }}px;
+        "
+      >
+        {{ product.title }} - 共{{ ep_count }}集
+      </h2>
+    {%- endif -%}
+
+    <div class="yt-shell" id="ytShell-{{ section.id }}">
+      <div class="yt-main-layout">
+
+        <!-- 左：播放器（⚠️ 不動這裡任何內容） -->
+        <div class="yt-player-column">
+          <div class="yt-wrap" id="ytWrap-{{ section.id }}">
+            <div id="ytPlayer-{{ section.id }}"></div>
+
+            <div class="yt-guard" id="ytGuard-{{ section.id }}" aria-hidden="true"></div>
+
+            <div class="yt-overlay" id="ytOverlay-{{ section.id }}">
+              <div class="yt-controls">
+                <div class="yt-playwrap">
+                  <div id="playHint-{{ section.id }}" class="play-hint">點我播放</div>
+
+                  <button class="icon-btn" id="btnPlay-{{ section.id }}" type="button" aria-label="播放/暂停" title="播放/暂停">
+                    <svg class="svg-ico icon-play" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8 5v14l11-7z"></path>
+                    </svg>
+                    <svg class="svg-ico icon-pause" viewBox="0 0 24 24" aria-hidden="true" style="display:none;">
+                      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
+                    </svg>
+                  </button>
+                </div>
+
+                <button class="icon-btn" id="btnMute-{{ section.id }}" type="button" aria-label="静音/取消静音" title="静音/取消静音">
+                  <!-- muted -->
+                  <svg class="svg-ico icon-mute" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M11 5L6.5 9H3v6h3.5L11 19V5z"></path>
+                    <path d="M16 9l5 5"></path>
+                    <path d="M21 9l-5 5"></path>
+                  </svg>
+                  <!-- unmuted -->
+                  <svg class="svg-ico icon-unmute" viewBox="0 0 24 24" aria-hidden="true" style="display:none;">
+                    <path d="M11 5L6.5 9H3v6h3.5L11 19V5z"></path>
+                    <path d="M15.5 8.5a4.5 4.5 0 010 7"></path>
+                    <path d="M17.5 6.5a7 7 0 010 11"></path>
+                  </svg>
+                </button>
+
+                <button class="icon-btn" id="btnSpeedDown-{{ section.id }}" type="button" title="减速">
+                  <svg class="svg-ico" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M14.5 7l-5 5 5 5"></path>
+                    <path d="M19 7l-5 5 5 5"></path>
+                  </svg>
+                </button>
+
+                <span id="speedDisplay-{{ section.id }}" style="font-size: 14px; min-width: 40px; text-align: center;">1x</span>
+
+                <button class="icon-btn" id="btnSpeedUp-{{ section.id }}" type="button" title="加速">
+                  <svg class="svg-ico" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M9.5 7l5 5-5 5"></path>
+                    <path d="M5 7l5 5-5 5"></path>
+                  </svg>
+                </button>
+
+                <button class="icon-btn ytf-fs-corner" id="btnFs-{{ section.id }}" type="button" aria-label="全屏/退出全屏" title="全屏">
+                  <!-- enter -->
+                  <svg class="svg-ico icon-fs-enter" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M9 3H5a2 2 0 00-2 2v4"></path>
+                    <path d="M15 3h4a2 2 0 012 2v4"></path>
+                    <path d="M9 21H5a2 2 0 01-2-2v-4"></path>
+                    <path d="M15 21h4a2 2 0 002-2v-4"></path>
+                  </svg>
+                  <!-- exit -->
+                  <svg class="svg-ico icon-fs-exit" viewBox="0 0 24 24" aria-hidden="true" style="display:none;">
+                    <path d="M9 7H7v2"></path>
+                    <path d="M15 7h2v2"></path>
+                    <path d="M9 17H7v-2"></path>
+                    <path d="M15 17h2v-2"></path>
+                  </svg>
+                </button>
+
+                <button class="yt-unmute-hint" id="btnUnmute-{{ section.id }}" type="button" aria-label="開聲音" title="開聲音" style="display:none;">
+                  🔊 開聲音
+                </button>
+
+                <span class="yt-live-chip" id="ytLiveChip-{{ section.id }}">
+                  <span class="dot"></span> 直播中
+                </span>
+              </div>              
+
+              <div class="yt-seek-row">
+                <input id="seekBar-{{ section.id }}" class="yt-seek" type="range" min="0" max="0" step="0.1" value="0" aria-label="拖曳調整時間" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右：播放清單 -->
+        <aside class="yt-sidebar" aria-label="播放清單">
+          <div class="sidebar-header">播放清單</div>
+
+          <div class="sidebar-list" id="ytList-{{ section.id }}">
+            {%- comment -%} ① 優先：product metafield 行清單（vid | title） {%- endcomment -%}
+            {%- if playlist_lines != blank and playlist_lines.size > 0 -%}
+              {%- assign idx = 0 -%}
+              {%- for line in playlist_lines -%}
+                {%- assign row = line | strip -%}
+                {%- if row != blank -%}
+                  {%- assign parts = row | split: '|' -%}
+                  {%- assign vid = parts[0] | strip -%}
+                  {%- assign t = '' -%}
+                  {%- if parts.size > 1 -%}
+                    {%- assign t = parts[1] | strip -%}
+                  {%- endif -%}
+                  {%- if vid != blank -%}
+                    {%- assign alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_' -%}
+
+                    {%- assign p_len = idx | modulo: 5 | plus: 2 -%}
+                    {%- assign m1_len = idx | modulo: 3 | plus: 1 -%}
+                    {%- assign m2_len = idx | modulo: 4 | plus: 1 -%}
+                    {%- assign s_len = idx | modulo: 5 | plus: 1 -%}
+
+                    {%- assign seg_a = vid | slice: 0, 3 -%}
+                    {%- assign seg_b = vid | slice: 3, 5 -%}
+                    {%- assign seg_c = vid | slice: 8, 3 -%}
+
+                    {%- assign prefix = '' -%}
+                    {%- for i in (1..10) -%}
+                      {%- if i <= p_len -%}
+                        {%- assign pos = idx | plus: i | modulo: alphabet.size -%}
+                        {%- assign ch = alphabet | slice: pos, 1 -%}
+                        {%- assign prefix = prefix | append: ch -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+
+                    {%- assign mid1 = '' -%}
+                    {%- for i in (1..10) -%}
+                      {%- if i <= m1_len -%}
+                        {%- assign pos = idx | times: 3 | plus: i | modulo: alphabet.size -%}
+                        {%- assign ch = alphabet | slice: pos, 1 -%}
+                        {%- assign mid1 = mid1 | append: ch -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+
+                    {%- assign mid2 = '' -%}
+                    {%- for i in (1..10) -%}
+                      {%- if i <= m2_len -%}
+                        {%- assign pos = idx | times: 5 | plus: i | modulo: alphabet.size -%}
+                        {%- assign ch = alphabet | slice: pos, 1 -%}
+                        {%- assign mid2 = mid2 | append: ch -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+
+                    {%- assign suffix = '' -%}
+                    {%- for i in (1..10) -%}
+                      {%- if i <= s_len -%}
+                        {%- assign pos = idx | times: 7 | plus: i | modulo: alphabet.size -%}
+                        {%- assign ch = alphabet | slice: pos, 1 -%}
+                        {%- assign suffix = suffix | append: ch -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+
+                    {%- assign mixed = prefix | append: seg_a | append: mid1 | append: seg_b | append: mid2 | append: seg_c | append: suffix -%}
+
+                    <div class="playlist-item" data-index="{{ idx }}" data-vid="{{ mixed }}">
+                      <span class="item-num">{{ idx | plus: 1 }}.</span>
+                      <span class="item-title">{{ t | default: '未命名影片' }}</span>
+                    </div>
+                    {%- assign idx = idx | plus: 1 -%}
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+
+            {%- comment -%} ② 次要：blocks {%- endcomment -%}
+            {%- elsif has_blocks -%}
+              {% for block in section.blocks %}
+                <div class="playlist-item" data-index="{{ forloop.index0 }}" data-vid="{{ block.settings.video_id }}">
+                  <span class="item-num">{{ forloop.index }}.</span>
+                  <span class="item-title">{{ block.settings.title | default: '未命名影片' }}</span>
+                </div>
+              {% endfor %}
+            {%- endif -%}
+          </div>
+        </aside>
+
+      </div>
+    </div>
+
+    {%- if section.settings.notice_text != blank -%}
+      <div
+        class="ytp-notice"
+        style="
+          margin-top: {{ section.settings.notice_margin_top }}px;
+          margin-bottom: {{ section.settings.notice_margin_bottom }}px;
+        "
+      >
+        {{ section.settings.notice_text }}
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+<style>
+/* ===== 新增：標題 & 提醒文字（不影響播放器內部） ===== */
+.ytp-title{
+  font-size:22px;
+  font-weight:700;
+  line-height:1.3;
+}
+
+.ytp-notice{
+  font-size:14px;
+  line-height:1.6;
+  color:#333;
+  background:#f8f9fa;
+  border:1px solid #e7e7e7;
+  border-radius:10px;
+  padding:12px 14px;
+}
+
+/* ===== 你原本的樣式：播放器/清單（不改播放器內部） ===== */
+.yt-shell{width:100%;}
+.yt-main-layout{
+  display:grid;
+  grid-template-columns: 3fr 1fr;
+  background:#fff;
+  border:1px solid #e1e1e1;
+  border-radius:12px;
+  overflow:hidden;
+  align-items:stretch;
+}
+
+.yt-player-column{position:relative;background:transparent;min-height:0;}
+.yt-wrap{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/9;
+  overflow:hidden;
+  background:transparent;
+  border-radius:0;
+}
+.yt-wrap iframe{
+  position:absolute;inset:0;width:100%;height:100%;
+  border:0;
+  pointer-events:none; /* ✅ 維持：整個 iframe 平常不可點 */
+  z-index:1;
+}
+.yt-guard{position:absolute;inset:0;z-index:2;pointer-events:auto;cursor:pointer;}
+
+/* ===== 右側清單 ===== */
+.yt-sidebar{
+  display:flex;
+  flex-direction:column;
+  background:#f8f9fa;
+  border-left:1px solid #e1e1e1;
+  height:100%;
+  min-height:0;
+}
+.sidebar-header{
+  padding:15px;
+  font-weight:bold;
+  color:#333;
+  border-bottom:1px solid #e1e1e1;
+  background:#f1f3f5;
+}
+.sidebar-list{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  background:#f8f9fa;
+}
+.sidebar-list::-webkit-scrollbar{width:6px;}
+.sidebar-list::-webkit-scrollbar-thumb{background:#ccc;border-radius:10px;}
+
+.playlist-item{
+  padding:12px 15px;
+  display:flex;
+  gap:10px;
+  color:#555;
+  cursor:pointer;
+  border-bottom:1px solid #eee;
+  font-size:14px;
+}
+.playlist-item:hover{background:#e9ecef;}
+.playlist-item.active{
+  background:#dee2e6;
+  color:#000;
+  font-weight:bold;
+  border-left:4px solid #495057;
+}
+
+/* ===== 控制列 ===== */
+.yt-overlay{
+  position:absolute;left:0;right:0;bottom:0;height:25%;
+  display:flex;flex-direction:column;justify-content:flex-end;gap:10px;padding:12px;
+  background:linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0));
+  z-index:3;color:#fff;transition:opacity .25s ease;
+}
+.yt-overlay.hidden{opacity:0; pointer-events:none;}
+.yt-controls{display:flex;gap:10px;align-items:center;}
+
+.icon-btn{
+  width:44px;height:44px;border-radius:999px;border:0;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.18);color:#fff;cursor:pointer;
+}
+.icon-btn:hover{background:rgba(255,255,255,.28);}
+.icon-btn .icon{font-size:20px;line-height:1;}
+/* ===== SVG icons（继承按钮颜色与大小，不改按钮尺寸） ===== */
+.icon-btn .svg-ico{
+  width:22px;
+  height:22px;
+  display:block;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2.2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.yt-seek{-webkit-appearance:none;appearance:none;width:100%;height:6px;background:rgba(255,255,255,.35);border-radius:999px;outline:none;cursor:pointer;}
+.yt-seek::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;border:none;box-shadow:0 0 0 2px rgba(0,0,0,.25);}
+.yt-seek::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff;border:none;}
+
+/* ✅ 時間條 + 全屏 同一排（全屏在右側） */
+.yt-seek-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.yt-seek-row .yt-seek{
+  flex:1;
+  width:auto;        /* 覆蓋原本 width:100% 的觀念 */
+  margin:0;
+}
+
+/* ✅ 讓「點我播放」永遠黏在播放鍵上方，不受時間條/全屏排版影響 */
+.yt-playwrap{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+}
+
+.yt-playwrap .play-hint{
+  position:absolute;
+  left:0;
+  bottom: calc(100% + 10px);  /* 在播放鍵正上方 */
+  background:#ff0000;
+  color:#fff;
+  padding:4px 10px;
+  border-radius:4px;
+  font-size:14px;
+  font-weight:700;
+  display:none;
+  z-index:10;
+  white-space:nowrap;
+}
+
+.yt-playwrap .play-hint::after{
+  content:"";
+  position:absolute;
+  top:100%;
+  left:15px;
+  border-width:5px;
+  border-style:solid;
+  border-color:#ff0000 transparent transparent transparent;
+}
+.play-hint::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 15px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #ff0000 transparent transparent transparent;
+}
+
+/* 直播樣式 */
+.yt-wrap.is-live .yt-seek{display:none;}
+.yt-wrap.is-live .yt-overlay{height:14%;padding:8px;}
+.yt-live-chip{
+  display:none;
+  margin-left:8px;
+  padding:6px 10px;
+  background:#f00;
+  color:#fff;
+  font-weight:700;
+  font-size:14px;
+  border-radius:999px;
+  line-height:1;
+  align-items:center;
+  gap:6px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.15) inset;
+  pointer-events:none;
+}
+.yt-live-chip .dot{
+  width:8px;height:8px;border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(255,255,255,.25);
+}
+
+.yt-unmute-hint{
+  display:none;
+  padding:6px 10px;
+  background:#fff;
+  color:#000;
+  border:0;
+  border-radius:999px;
+  font-weight:700;
+  font-size:14px;
+  cursor:pointer;
+}
+.yt-unmute-hint:hover{filter:brightness(0.92);}
+
+/* 全螢幕修正（桌機/Android 等支援 Fullscreen API 時使用） */
+.yt-wrap:fullscreen,
+.yt-wrap:-webkit-full-screen,
+.yt-wrap:-moz-full-screen,
+.yt-wrap:-ms-fullscreen {
+  width:100vw !important;
+  height:100vh !important;
+  max-width:none !important;
+  max-height:none !important;
+  aspect-ratio:auto !important;
+  border-radius:0 !important;
+}
+.yt-wrap:fullscreen iframe,
+.yt-wrap:-webkit-full-screen iframe,
+.yt-wrap:-moz-full-screen iframe,
+.yt-wrap:-msfull-screen iframe {
+  width:100vw !important;
+  height:100vh !important;
+}
+.yt-wrap:fullscreen .yt-overlay,
+.yt-wrap:-webkit-full-screen .yt-overlay,
+.yt-wrap:-moz-full-screen .yt-overlay,
+.yt-wrap:-msfull-screen .yt-overlay {
+  height:18%;
+  padding:16px;
+}
+.yt-wrap:fullscreen .icon-btn{width:48px;height:48px;}
+
+/* 手機：上下排列 */
+@media (max-width: 900px){
+  .yt-main-layout{display:block;}
+  .yt-sidebar{
+    max-height:350px;
+    border-left:0;
+    border-top:1px solid #e1e1e1;
+  }
+  .sidebar-list{height:300px;}
+}
+
+
+</style>
+
+<script>
+(function(){
+  var pid = "{{ section.id }}";
+  var STORAGE_KEY = "yt_memory_" + pid;
+  var isIOS = /iP(hone|od|ad)/.test(navigator.userAgent);
+
+  // ✅ 從 DOM 讀播放清單：唯一來源
+  function getPlaylistFromDOM(){
+    var listEl = document.getElementById("ytList-" + pid);
+    var items = listEl ? Array.prototype.slice.call(listEl.querySelectorAll(".playlist-item")) : [];
+    return items.map(function(el){
+      var titleEl = el.querySelector(".item-title");
+      var raw = ((el.getAttribute("data-vid") || "") + "").trim();
+      var idx = parseInt(el.getAttribute("data-index") || "0", 10);
+      if (isNaN(idx)) idx = 0;
+
+      // 还原规则（必须和 Liquid 保持一致）
+      var pLen  = (idx % 5) + 2; // 2~6
+      var m1Len = (idx % 3) + 1; // 1~3
+      var m2Len = (idx % 4) + 1; // 1~4
+      // var sLen  = (idx % 5) + 1; // 1~5（不需要用到）
+
+      // mixed 结构：p + A(3) + m1 + B(5) + m2 + C(3) + s
+      var aStart = pLen;
+      var a = raw.slice(aStart, aStart + 3);
+
+      var bStart = aStart + 3 + m1Len;
+      var b = raw.slice(bStart, bStart + 5);
+
+      var cStart = bStart + 5 + m2Len;
+      var c = raw.slice(cStart, cStart + 3);
+
+      var realId = (a + b + c).trim();
+
+      return {
+        id: realId,
+        title: (titleEl ? (titleEl.textContent || "") : "").trim()
+      };
+    }).filter(function(x){ return x && x.id; });
+  }
+
+  var playlist = getPlaylistFromDOM();
+  if(!playlist.length) return;
+
+  function loadYT(){
+    if(window.YT && window.YT.Player) return Promise.resolve();
+    if(window.__ytIframeApiLoading) return window.__ytIframeApiLoading;
+
+    window.__ytIframeApiLoading = new Promise(function(resolve){
+      var tag=document.createElement('script');
+      tag.src="https://www.youtube.com/iframe_api";
+      document.head.appendChild(tag);
+
+      var prev = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = function(){
+        if(typeof prev === "function") prev();
+        resolve();
+      };
+    });
+
+    return window.__ytIframeApiLoading;
+  }
+
+  var player, btnPlay, btnMute, btnUnmute, seekBar, overlay, wrap, liveChip, guard;
+  var progressTimer=null, isSeeking=false, hover=false, liveCheckTimer=null;
+  var currentIdx = 0;
+
+  function readMemory(){
+    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+    catch(e){ return {}; }
+  }
+  function writeMemory(videoId, time){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({ vid: videoId, time: time })); }
+    catch(e){}
+  }
+
+  function isLive(){
+    if(!player) return false;
+    var dur = player.getDuration() || 0;
+    if(dur === 0) return true;
+    try{
+      var t = (player.getVideoData && player.getVideoData().title) || "";
+      if(/LIVE|直播/i.test(t)) return true;
+    }catch(e){}
+    return false;
+  }
+
+  function initDom(){
+    btnPlay   = document.getElementById("btnPlay-"+pid);
+    btnMute   = document.getElementById("btnMute-"+pid);
+    btnUnmute = document.getElementById("btnUnmute-"+pid);
+    seekBar   = document.getElementById("seekBar-"+pid);
+    overlay   = document.getElementById("ytOverlay-"+pid);
+    wrap      = document.getElementById("ytWrap-"+pid);
+    liveChip  = document.getElementById("ytLiveChip-"+pid);
+    guard     = document.getElementById("ytGuard-"+pid);
+
+    if(guard){
+      guard.addEventListener("click", function(){
+        var st = player.getPlayerState();
+        if(st === YT.PlayerState.PLAYING) player.pauseVideo();
+        else player.playVideo();
+      });
+    }
+
+    if(btnPlay) btnPlay.addEventListener('click', function(){
+      var st = player.getPlayerState();
+      if(st === YT.PlayerState.PLAYING) player.pauseVideo();
+      else player.playVideo();
+    });
+
+    if(btnMute) btnMute.addEventListener('click', function(){
+      if(player.isMuted()) player.unMute();
+      else player.mute();
+      syncMuteButton();
+    });
+
+    if(btnUnmute) btnUnmute.addEventListener('click', function(){
+      player.unMute();
+      syncMuteButton();
+    });
+
+    var btnSpeedUp = document.getElementById("btnSpeedUp-" + pid);
+    var btnSpeedDown = document.getElementById("btnSpeedDown-" + pid);
+    var speedDisplay = document.getElementById("speedDisplay-" + pid);
+    var speeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+
+    function updateSpeed(delta) {
+      var currentRate = player.getPlaybackRate();
+      var currentIndex = speeds.indexOf(currentRate);
+      if (currentIndex === -1) currentIndex = 3;
+      var newIndex = Math.min(Math.max(currentIndex + delta, 0), speeds.length - 1);
+      var newRate = speeds[newIndex];
+      player.setPlaybackRate(newRate);
+      if(speedDisplay) speedDisplay.textContent = newRate + "x";
+    }
+
+    if(btnSpeedUp) btnSpeedUp.addEventListener('click', function() { updateSpeed(1); });
+    if(btnSpeedDown) btnSpeedDown.addEventListener('click', function() { updateSpeed(-1); });
+
+    var btnFs = document.getElementById("btnFs-"+pid);
+    if(btnFs) btnFs.addEventListener('click', function(){
+      toggleFullscreen(); // 所有裝置一致：只走 Fullscreen API，不開洞、不提示
+    });
+
+    function syncFsButton(){
+      if(!btnFs) return;
+      var enterSvg = btnFs.querySelector('.icon-fs-enter');
+      var exitSvg  = btnFs.querySelector('.icon-fs-exit');
+      if(!enterSvg || !exitSvg) return;
+
+      var fs = isFullscreen();
+      enterSvg.style.display = fs ? "none" : "block";
+      exitSvg.style.display  = fs ? "block" : "none";
+    }
+
+    document.addEventListener("fullscreenchange", syncFsButton);
+    document.addEventListener("webkitfullscreenchange", syncFsButton);
+    document.addEventListener("mozfullscreenchange", syncFsButton);
+    document.addEventListener("MSFullscreenChange", syncFsButton);
+
+    setTimeout(syncFsButton, 0);
+
+    if(seekBar){
+      seekBar.addEventListener('input', function(){ isSeeking = true; });
+      seekBar.addEventListener('change', function(){
+        player.seekTo(parseFloat(seekBar.value));
+        isSeeking = false;
+      });
+    }
+
+    if(wrap){
+      wrap.addEventListener('mouseenter', function(){ hover=true; updateControlsVisibility(); });
+      wrap.addEventListener('mouseleave', function(){ hover=false; updateControlsVisibility(); });
+    }
+
+    // ✅ 清單點擊：事件委派
+    var listEl = document.getElementById("ytList-"+pid);
+    if(listEl){
+      listEl.addEventListener("click", function(ev){
+        var el = ev.target;
+        while(el && el !== listEl && !el.classList.contains("playlist-item")){
+          el = el.parentNode;
+        }
+        if(!el || el === listEl) return;
+
+        var idx = parseInt(el.getAttribute("data-index"), 10);
+        if(isNaN(idx)) return;
+        changeVideo(idx, false);
+      });
+    }
+
+    // ✅ 右側高度跟隨左側（僅桌機生效，避免手機高度跳動）
+    function syncSidebarHeight(){
+      if(window.matchMedia && window.matchMedia("(max-width: 900px)").matches) return;
+
+      var wrapEl = document.getElementById("ytWrap-"+pid);
+      var sidebar = document.querySelector("#ytShell-"+pid+" .yt-sidebar");
+      if(!wrapEl || !sidebar) return;
+
+      sidebar.style.height = wrapEl.offsetHeight + "px";
+    }
+
+    window.addEventListener("resize", syncSidebarHeight);
+    setTimeout(syncSidebarHeight, 300);
+  }
+
+  function updatePlaylistUI(){
+    var items = document.querySelectorAll("#ytList-"+pid+" .playlist-item");
+    items.forEach(function(el, i){
+      el.classList.toggle("active", i === currentIdx);
+    });
+    try{
+      var active = document.querySelector("#ytList-"+pid+" .playlist-item.active");
+      if(active && active.scrollIntoView){
+        active.scrollIntoView({ block: "nearest" });
+      }
+    }catch(e){}
+  }
+
+  function changeVideo(idx, useSavedTime){
+    if(!player) return;
+
+    playlist = getPlaylistFromDOM();
+    if(!playlist.length) return;
+
+    if(idx < 0 || idx >= playlist.length) return;
+    currentIdx = idx;
+    updatePlaylistUI();
+
+    var mem = readMemory();
+    var startAt = 0;
+    if(useSavedTime && mem && mem.vid === playlist[currentIdx].id && mem.time){
+      startAt = Math.floor(mem.time);
+    }
+
+    player.loadVideoById({ videoId: playlist[currentIdx].id, startSeconds: startAt });
+  }
+
+  function onPlayerReady(){
+    initDom();
+
+    var mem = readMemory();
+    if(mem.vid){
+      var found = playlist.findIndex(function(x){ return x.id === mem.vid; });
+      if(found !== -1) currentIdx = found;
+    }
+
+    updatePlaylistUI();
+    changeVideo(currentIdx, true);
+
+    var hint = document.getElementById("playHint-" + pid);
+    if(hint && mem.vid && mem.time) hint.style.display = "block";
+
+    startLiveCheckTimer();
+  }
+
+  function onPlayerStateChange(e){
+    var isPlaying = (e.data === YT.PlayerState.PLAYING);
+
+    if(btnPlay){
+      var playSvg = btnPlay.querySelector('.icon-play');
+      var pauseSvg = btnPlay.querySelector('.icon-pause');
+      if(playSvg && pauseSvg){
+        playSvg.style.display = isPlaying ? "none" : "block";
+        pauseSvg.style.display = isPlaying ? "block" : "none";
+      }
+    }
+    var hint = document.getElementById("playHint-" + pid);
+    if(hint){
+      hint.style.display = isPlaying ? 'none' : (readMemory().vid ? 'block' : 'none');
+    }
+
+    if(isPlaying) startProgressTimer();
+    else stopProgressTimer();
+
+    syncMuteButton();
+    syncDuration();
+    updateControlsVisibility();
+
+    // ✅ 播完下一支
+    if(e.data === YT.PlayerState.ENDED){
+      playlist = getPlaylistFromDOM();
+      if(currentIdx < playlist.length - 1){
+        changeVideo(currentIdx + 1, false);
+      }
+    }
+  }
+
+  function startProgressTimer(){
+    if(progressTimer) clearInterval(progressTimer);
+    progressTimer = setInterval(function(){
+      if(!player || isSeeking) return;
+
+      var dur = player.getDuration() || 0;
+      var t = player.getCurrentTime() || 0;
+
+      if(dur > 0 && seekBar){
+        seekBar.value = t;
+        seekBar.max = dur;
+      }
+
+      if(dur > 0) writeMemory(playlist[currentIdx].id, t);
+      else writeMemory(playlist[currentIdx].id, 0);
+    }, 500);
+  }
+  function stopProgressTimer(){
+    if(progressTimer) clearInterval(progressTimer);
+    progressTimer = null;
+  }
+
+  function syncMuteButton(){
+    if(!player || !btnMute) return;
+
+    // YouTube 的 mute/unmute 有時是非同步狀態更新，延遲一點點更穩
+    setTimeout(function(){
+      var muted = !!player.isMuted();
+
+      var muteSvg = btnMute.querySelector('.icon-mute');
+      var unmuteSvg = btnMute.querySelector('.icon-unmute');
+
+      if(muteSvg)   muteSvg.style.display   = muted ? "block" : "none";
+      if(unmuteSvg) unmuteSvg.style.display = muted ? "none" : "block";
+
+      // 直播 + 靜音時才顯示「🔊 開聲音」
+      if(btnUnmute){
+        btnUnmute.style.display = (isLive() && muted) ? "inline-flex" : "none";
+      }
+    }, 60);
+  }
+
+  function syncDuration(){
+    var live = isLive();
+    if(wrap) wrap.classList.toggle('is-live', live);
+    if(liveChip) liveChip.style.display = live ? 'inline-flex' : 'none';
+  }
+
+  function startLiveCheckTimer(){
+    if(liveCheckTimer) clearInterval(liveCheckTimer);
+    liveCheckTimer = setInterval(syncDuration, 2000);
+  }
+
+  function updateControlsVisibility(){
+    if(!player || !overlay) return;
+    var st = player.getPlayerState();
+    var shouldShow = isLive() || (st !== YT.PlayerState.PLAYING) || hover;
+    overlay.classList.toggle('hidden', !shouldShow);
+  }
+
+  function isFullscreen(){
+    return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+  }
+  function toggleFullscreen(){
+    if(!wrap) return;
+    if(!isFullscreen()){
+      if(wrap.requestFullscreen) wrap.requestFullscreen();
+      else if(wrap.webkitRequestFullscreen) wrap.webkitRequestFullscreen();
+      else if(wrap.mozRequestFullScreen) wrap.mozRequestFullScreen();
+      else if(wrap.msRequestFullscreen) wrap.msRequestFullscreen();
+    }else{
+      if(document.exitFullscreen) document.exitFullscreen();
+      else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+      else if(document.mozCancelFullScreen) document.mozCancelFullScreen();
+      else if(document.msExitFullscreen) document.msExitFullscreen();
+    }
+  }
+
+  function createPlayer(){
+    var mem = readMemory();
+    if(mem.vid){
+      var found = playlist.findIndex(function(x){ return x.id === mem.vid; });
+      if(found !== -1) currentIdx = found;
+    }
+
+    var startAt = 0;
+    if(mem && mem.vid === playlist[currentIdx].id && mem.time){
+      startAt = Math.floor(mem.time);
+    }
+
+    player = new YT.Player("ytPlayer-"+pid, {
+      host: "https://www.youtube.com",
+      videoId: playlist[currentIdx].id,
+      playerVars: {
+        enablejsapi: 1,
+        controls: 0,
+        disablekb: 1,
+        modestbranding: 1,
+        rel: 0,
+        iv_load_policy: 3,
+        fs: 1,
+        playsinline: 1,
+        start: startAt
+      },
+      events: {
+        onReady: onPlayerReady,
+        onStateChange: onPlayerStateChange
+      }
+    });
+  }
+
+  loadYT().then(createPlayer);
+})();
+</script>
+
+{% else %}
+  <div style="padding:12px;background:#fff3cd;border-radius:8px;">
+    請在產品 Metafield：<code>custom.youtube_list</code> 填入播放清單（每行：<code>影片ID | 標題</code>），或在此 Section 新增播放清單影片（Blocks）。
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "自訂 YouTube 播放器＋播放清單（可直播）",
+  "settings": [
+    {
+      "type": "range",
+      "id": "section_pad_top",
+      "label": "Section 上方間距（px）",
+      "min": 0,
+      "max": 140,
+      "step": 4,
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "section_pad_bottom",
+      "label": "Section 下方間距（px）",
+      "min": 0,
+      "max": 140,
+      "step": 4,
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "title_margin_top",
+      "label": "標題上方間距（px）",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "title_margin_bottom",
+      "label": "標題下方間距（px）",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 16
+    },
+    {
+      "type": "richtext",
+      "id": "notice_text",
+      "label": "底部提醒文字（顯示在播放器+清單下方）",
+      "default": "<p>📌 操作提醒：可點右側清單切換集數；播放器會自動記憶你上次看到的進度。<br>⚠️蘋果系統原生限制，無法全螢幕顯示，敬請見諒！<br>⚠️如您遇到驗證問題，請前往<a href=\"https://www.youtube.com/\" target=\"_blank\">YouTube</a>登入後，回此頁面重新整理即可繼續觀看。</p>"
+    },
+    {
+      "type": "range",
+      "id": "notice_margin_top",
+      "label": "提醒文字上方間距（px）",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "notice_margin_bottom",
+      "label": "提醒文字下方間距（px）",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "video",
+      "name": "播放清單影片",
+      "settings": [
+        { "type": "text", "id": "video_id", "label": "YouTube 影片 ID（或短網址中的 ID）" },
+        { "type": "text", "id": "title", "label": "清單標題" }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "YT播放器＋播放清單" }
+  ]
+}
+{% endschema %}
