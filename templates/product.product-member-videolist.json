@@ -9,6 +9,19 @@
  */
 {
   "sections": {
+    "custom_youtube_playlist_U3Wjex": {
+      "type": "custom-youtube-playlist",
+      "name": "YT播放器＋播放清單",
+      "settings": {
+        "section_pad_top": 36,
+        "section_pad_bottom": 36,
+        "title_margin_top": 0,
+        "title_margin_bottom": 16,
+        "notice_text": "<p>📌 操作提醒：可點右側清單切換集數；播放器會自動記憶你上次看到的進度。<br/>⚠️蘋果系統原生限制，無法全螢幕顯示，敬請見諒！<br/>⚠️如您遇到驗證問題，請前往<a href=\"https://www.youtube.com/\" target=\"_blank\">YouTube</a>登入後，回此頁面重新整理即可繼續觀看。</p>",
+        "notice_margin_top": 16,
+        "notice_margin_bottom": 0
+      }
+    },
     "2246be81-f016-4af3-a46e-0b3d46f7e978": {
       "type": "breadcrumb",
       "disabled": true,
@@ -249,19 +262,6 @@
       "settings": {
         "page_full_width": false,
         "prev_next_products": true
-      }
-    },
-    "custom_youtube_playlist_U3Wjex": {
-      "type": "custom-youtube-playlist",
-      "name": "YT播放器＋播放清單",
-      "settings": {
-        "section_pad_top": 36,
-        "section_pad_bottom": 36,
-        "title_margin_top": 0,
-        "title_margin_bottom": 16,
-        "notice_text": "<p>📌 操作提醒：可點右側清單切換集數；播放器會自動記憶你上次看到的進度。<br/>⚠️蘋果系統原生限制，無法全螢幕顯示，敬請見諒！<br/>⚠️如您遇到驗證問題，請前往<a href=\"https://www.youtube.com/\" target=\"_blank\">YouTube</a>登入後，回此頁面重新整理即可繼續觀看。</p>",
-        "notice_margin_top": 16,
-        "notice_margin_bottom": 0
       }
     }
   },
