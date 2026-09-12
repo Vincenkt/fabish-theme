@@ -4,7 +4,7 @@
   ✅ 直播：靜音自動播 → 偵測播放後嘗試自動取消靜音；若失敗顯示「開聲音」鈕
   ✅ 直播：YouTube 風格 LIVE 標籤常駐、時間軸隱藏、控制列常駐
   ✅ 右側播放清單：可點選、播完下一支、記憶進度
-  ✅ 改進：播放清單來源統一「從 DOM 讀」，支援 product metafield 行清單 / blocks
+  ✅ 改進：播放清單來源統一「從 DOM 讀」，支援商品描述欄行清單 / blocks
 
   ✅ 新增（不動播放器內部）：
   - Section 上下間距可調
@@ -18,14 +18,47 @@
   - 除了右下角洞，其餘區域全程不可點擊（維持你的需求）
 {% endcomment %}
 
-{%- assign playlist_text = '' -%}
-{%- if product and product.metafields.custom.youtube_list -%}
-  {%- assign playlist_text = product.metafields.custom.youtube_list.value | default: product.metafields.custom.youtube_list -%}
-{%- endif -%}
-
+{%- comment -%}
+  商品描述欄：每行「YouTube 影片 ID | 標題」。
+  先保留富文字換行，再去除 HTML；忽略空行及不符合格式的內容。
+{%- endcomment -%}
 {%- assign playlist_lines = '' -%}
-{%- if playlist_text != blank -%}
-  {%- assign playlist_lines = playlist_text | newline_to_br | split: '<br />' -%}
+{%- assign alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_' -%}
+{%- if product and product.description != blank -%}
+  {%- assign description_html = product.description
+    | newline_to_br
+    | replace: '<br>', '<br />'
+    | replace: '<br/>', '<br />'
+    | replace: '</p>', '<br />'
+    | replace: '</div>', '<br />'
+    | replace: '</li>', '<br />'
+  -%}
+  {%- assign description_rows = description_html | split: '<br />' -%}
+  {%- capture valid_playlist_text -%}
+    {%- for description_row in description_rows -%}
+      {%- assign row = description_row | strip_html | replace: '&nbsp;', ' ' | replace: '&#160;', ' ' | replace: ' ', ' ' | strip -%}
+      {%- if row contains '|' -%}
+        {%- assign parts = row | split: '|' -%}
+        {%- assign vid = parts[0] | strip -%}
+        {%- assign valid_id = false -%}
+        {%- if vid.size == 11 -%}
+          {%- assign valid_id = true -%}
+          {%- assign id_chars = vid | split: '' -%}
+          {%- for id_char in id_chars -%}
+            {%- unless alphabet contains id_char -%}
+              {%- assign valid_id = false -%}
+            {%- endunless -%}
+          {%- endfor -%}
+        {%- endif -%}
+        {%- if valid_id -%}
+          {{- row -}}<br />
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endcapture -%}
+  {%- if valid_playlist_text != blank -%}
+    {%- assign playlist_lines = valid_playlist_text | split: '<br />' -%}
+  {%- endif -%}
 {%- endif -%}
 
 {% assign has_blocks = false %}
@@ -174,7 +207,7 @@
           <div class="sidebar-header">播放清單</div>
 
           <div class="sidebar-list" id="ytList-{{ section.id }}">
-            {%- comment -%} ① 優先：product metafield 行清單（vid | title） {%- endcomment -%}
+            {%- comment -%} ① 優先：商品描述欄行清單（vid | title） {%- endcomment -%}
             {%- if playlist_lines != blank and playlist_lines.size > 0 -%}
               {%- assign idx = 0 -%}
               {%- for line in playlist_lines -%}
@@ -238,7 +271,7 @@
 
                     <div class="playlist-item" data-index="{{ idx }}" data-vid="{{ mixed }}">
                       <span class="item-num">{{ idx | plus: 1 }}.</span>
-                      <span class="item-title">{{ t | default: '未命名影片' }}</span>
+                      <span class="item-title">{{ t | default: '未命名影片' | replace: '&amp;', '&' | replace: '&quot;', '"' | replace: '&#39;', "'" | replace: '&lt;', '<' | replace: '&gt;', '>' | escape }}</span>
                     </div>
                     {%- assign idx = idx | plus: 1 -%}
                   {%- endif -%}
@@ -563,7 +596,7 @@
       var cStart = bStart + 5 + m2Len;
       var c = raw.slice(cStart, cStart + 3);
 
-      var realId = (a + b + c).trim();
+      var realId = /^[A-Za-z0-9_-]{11}$/.test(raw) ? raw : (a + b + c).trim();
 
       return {
         id: realId,
