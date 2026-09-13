@@ -68,12 +68,22 @@
             "button_link": "",
             "button_style_secondary": false
           }
+        },
+        "featured_collection_aCrhTG": {
+          "type": "featured_collection",
+          "settings": {
+            "collection": "frontpage",
+            "button_label": "Button label",
+            "button_link": "",
+            "button_style_secondary": false
+          }
         }
       },
       "block_order": [
         "featured_collection_ahiAJh",
         "featured_collection_yVm8be",
-        "featured_collection_iewYU3"
+        "featured_collection_iewYU3",
+        "featured_collection_aCrhTG"
       ],
       "name": "t:sections.collection-list.presets.name",
       "settings": {
@@ -156,8 +166,37 @@
         "columns_mobile": "1"
       }
     },
+    "form_image_QgbxBj": {
+      "type": "form-image",
+      "name": "t:sections.form-image.presets.name",
+      "settings": {
+        "page_full_width": false,
+        "page_full_width_spacing": false,
+        "title": "聯繫我們",
+        "sub_heading": "Sub Heading",
+        "description": "Use This Text To Share The Information Which You Like!.",
+        "button_label": "",
+        "button_link": "",
+        "button_style_secondary": false,
+        "column_alignment": "center",
+        "color_scheme": "background-1",
+        "address_heading": "",
+        "address_desc": "",
+        "additional_address_heading": "",
+        "address_desc_1": "",
+        "collapsible_address": "",
+        "address_desc_2": "",
+        "collapsible_contact_no": "",
+        "address_desc_3": "",
+        "collapsible_contact_id": "",
+        "block_alignments": "image-with-form",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
     "custom_liquid_dp9WRX": {
       "type": "custom-liquid",
+      "disabled": true,
       "name": "t:sections.custom-liquid.presets.name",
       "settings": {
         "page_full_width": false,
@@ -202,6 +241,7 @@
     "custom_liquid_b7PryG",
     "collection_list_XkNPTz",
     "featured_collection_for_member_KAMrFf",
+    "form_image_QgbxBj",
     "custom_liquid_dp9WRX",
     "custom_liquid_LCHN8K"
   ]
