@@ -45,7 +45,7 @@
         "featured_collection_ahiAJh": {
           "type": "featured_collection",
           "settings": {
-            "collection": "會員影片",
+            "collection": "member-video",
             "button_label": "Button label",
             "button_link": "",
             "button_style_secondary": false
