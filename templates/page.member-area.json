@@ -68,22 +68,12 @@
             "button_link": "",
             "button_style_secondary": false
           }
-        },
-        "featured_collection_aCrhTG": {
-          "type": "featured_collection",
-          "settings": {
-            "collection": "frontpage",
-            "button_label": "Button label",
-            "button_link": "",
-            "button_style_secondary": false
-          }
         }
       },
       "block_order": [
         "featured_collection_ahiAJh",
         "featured_collection_yVm8be",
-        "featured_collection_iewYU3",
-        "featured_collection_aCrhTG"
+        "featured_collection_iewYU3"
       ],
       "name": "t:sections.collection-list.presets.name",
       "settings": {
