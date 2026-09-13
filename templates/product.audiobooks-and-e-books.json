@@ -15,7 +15,6 @@
         "page_full_width": true,
         "page_full_width_spacing": true,
         "use_breadcrumb_title": true,
-        "breadcrumb_image": "shopify://shop_images/about-breadcrumb-1.jpg",
         "breadcrumb_style": "center",
         "image_overlay_opacity": 60,
         "color_scheme": "background-2",
@@ -111,6 +110,12 @@
             "page": "certificate"
           }
         },
+        "custom_liquid_Xybxa7": {
+          "type": "custom_liquid",
+          "settings": {
+            "custom_liquid": "可以，直接用這段替換原本程式碼。**未登入或沒有指定標籤**時，會顯示「如您已經購買，請點擊按鈕」。\n\n```liquid\n{% liquid\n  assign has_membership = false\n  if customer\n    if customer.tags contains 'hv-mem' or customer.tags contains 'spons-mem'\n      assign has_membership = true\n    endif\n  endif\n%}\n\n<div style=\"margin:24px 0;padding:24px;border:1px solid #dce3ec;border-radius:12px;background:#f5f7fa;text-align:center;\">\n  <p style=\"margin:0 0 18px;color:#173b63;font-size:18px;font-weight:500;line-height:1.7;\">\n    {% if has_membership %}\n      你已有會員，可直接觀看本書\n    {% else %}\n      如您已經購買，請點擊按鈕\n    {% endif %}\n  </p>\n\n  <a href=\"/apps/downloads/orders/\"\n     style=\"display:inline-block;padding:13px 28px;border-radius:8px;background:#173b63;color:#ffffff;text-decoration:none;font-size:16px;font-weight:600;line-height:1.5;\">\n    前往觀看\n  </a>\n</div>\n```"
+          }
+        },
         "fba18659-f515-470a-ad98-83721b6d8b37": {
           "type": "buy_buttons",
           "settings": {
@@ -148,6 +153,7 @@
         "27623c12-0b97-4758-bdfe-58f4a6a6590f",
         "0bfec2f5-5d58-468c-92f3-9a99aed291fb",
         "collapsible-row-1",
+        "custom_liquid_Xybxa7",
         "fba18659-f515-470a-ad98-83721b6d8b37",
         "3f7d416a-1acc-4807-845a-a90b79a879f9",
         "8b614703-5d11-4efc-b5d0-e7e014e4d422"
