@@ -449,5 +449,108 @@
         </div>
       </div>
     </div>
+    <!-- Add once, immediately before </body> in layout/theme.liquid. -->
+<script>
+(function () {
+  'use strict';
+  if (window.gmcMemberSectionLoaderInstalled) return;
+  window.gmcMemberSectionLoaderInstalled = true;
+
+  const sectionId = 'template--20246135177282__featured_collection_for_member_KAMrFf';
+  const selector = '.gmc-member-gate .gmc-member-products';
+  const states = new WeakSet();
+  let cachedHTML;
+
+  async function getSection() {
+    if (!cachedHTML) {
+      cachedHTML = (async function () {
+        const root = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+        const url = new URL(root + 'pages/member-area', location.origin);
+        url.searchParams.set('section_id', sectionId);
+        const controller = new AbortController();
+        const timeout = setTimeout(function () { controller.abort(); }, 15000);
+        try {
+          const response = await fetch(url, { credentials: 'same-origin', signal: controller.signal });
+          if (!response.ok) throw new Error('Section request failed: ' + response.status);
+          const html = await response.text();
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          const section = doc.getElementById('shopify-section-' + sectionId);
+          if (!section || !section.querySelector('.card-product-description')) {
+            throw new Error('Member product section was not returned.');
+          }
+          return section.outerHTML;
+        } finally {
+          clearTimeout(timeout);
+        }
+      })().catch(function (error) { cachedHTML = null; throw error; });
+    }
+    return cachedHTML;
+  }
+
+  function loadCardDependencies(section) {
+    const sources = Array.from(section.querySelectorAll('script[src]')).map(function (s) { return s.src; });
+    section.querySelectorAll('script').forEach(function (s) { s.remove(); });
+    // Only load the two existing theme components used by these product cards.
+    sources.forEach(function (src) {
+      const url = new URL(src, location.href);
+      if (url.origin !== location.origin || !/\/assets\/(quick-add|product-form)\.js$/.test(url.pathname)) return;
+      if (Array.from(document.scripts).some(function (s) { return s.src === url.href; })) return;
+      const script = document.createElement('script');
+      script.src = url.href;
+      script.async = false;
+      document.head.appendChild(script);
+    });
+    section.querySelectorAll('link[rel="stylesheet"]').forEach(function (link) {
+      link.media = 'all';
+      link.removeAttribute('onload');
+    });
+  }
+
+  async function mount(host) {
+    if (states.has(host)) return;
+    states.add(host);
+    host.setAttribute('aria-busy', 'true');
+    try {
+      const html = await getSection();
+      if (!host.isConnected) return;
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const section = doc.getElementById('shopify-section-' + sectionId);
+      loadCardDependencies(section);
+      host.replaceChildren(document.importNode(section, true));
+    } catch (error) {
+      // Keep the original membership link usable if loading fails.
+      console.warn('[Member plans]', error.message);
+    } finally {
+      host.removeAttribute('aria-busy');
+    }
+  }
+
+  function start() {
+    const style = document.createElement('style');
+    style.textContent = `
+      .gmc-member-gate a:focus-visible { outline: 3px solid #6389b4; outline-offset: 4px; }
+      .gmc-member-products .collection.page-width { width:100%; max-width:none; padding:0; }
+      .gmc-member-products .product-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:24px; margin:0; }
+      .gmc-member-products .product-grid > .grid__item { width:100%; max-width:none; padding:0; }
+      @media(max-width:749px) { .gmc-member-products .product-grid { grid-template-columns:1fr; gap:20px; } }
+    `;
+    document.head.appendChild(style);
+    document.querySelectorAll(selector).forEach(mount);
+    const observer = new MutationObserver(function (records) {
+      records.forEach(function (record) {
+        record.addedNodes.forEach(function (node) {
+          if (node.nodeType !== 1) return;
+          if (node.matches(selector)) mount(node);
+          node.querySelectorAll(selector).forEach(mount);
+        });
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
+  else start();
+})();
+
+</script>
   </body>
 </html>
