@@ -128,7 +128,7 @@
         "button_link": "",
         "button_style_secondary": false,
         "column_alignment": "center",
-        "collection": "會員",
+        "collection": "members",
         "products_to_show": 3,
         "columns_desktop": 3,
         "show_view_all": true,
