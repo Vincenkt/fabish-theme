@@ -91,7 +91,7 @@
             </div>
             <div class="er-menu er-navigation" data-bottom>
               <button type="button" data-prev disabled>上一頁</button>
-              <span class="er-location" data-location aria-live="polite">位於索引章節 —</span>
+              <span class="er-location" data-location aria-live="polite">位於章節索引 —</span>
               <button type="button" data-next disabled>下一頁</button>
             </div>
           </div>
@@ -344,7 +344,7 @@
       if (!this.isConnected || !this.book) return;
       this.position = value;
       if (value.start) {
-        this.ui.location.textContent = '位於索引章節 ' + (Number(value.start.index)+1) + ' / ' + Math.max(1,this.book.spine.spineItems.length - 1);
+        this.ui.location.textContent = '位於章節索引 ' + (Number(value.start.index)+1) + ' / ' + Math.max(1,this.book.spine.spineItems.length - 1);
         const href = String(value.start.href || '').split('#')[0];
         const match = Array.from(this.ui.toc.options).find(option => option.value && option.value.split('#')[0] === href);
         this.ui.toc.value = match ? match.value : '';
