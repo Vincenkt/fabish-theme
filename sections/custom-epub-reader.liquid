@@ -1,0 +1,1088 @@
+{% comment %}
+  EPUB Reader Section
+  Dependencies: JSZip 3.10.1 / EPUB.js 0.3.93
+
+  商品 Metafield 支援 URL 或單行文字類型。
+  會員限制只控制頁面輸出，不會保護公開 EPUB 網址。
+{% endcomment %}
+
+{% liquid
+  assign reader_access = true
+
+  if section.settings.members_only
+    assign reader_access = false
+
+    if customer
+      assign allowed_tags = section.settings.member_tags | split: ','
+
+      for allowed_tag in allowed_tags
+        assign clean_tag = allowed_tag | strip
+
+        if clean_tag != blank and customer.tags contains clean_tag
+          assign reader_access = true
+          break
+        endif
+      endfor
+    endif
+  endif
+
+  if request.design_mode
+    assign reader_access = true
+  endif
+
+  assign epub_source = section.settings.epub_url | strip
+
+  if section.settings.use_metafield and product
+    assign meta_namespace = section.settings.meta_namespace | strip
+    assign meta_key = section.settings.meta_key | strip
+    assign book_metafield = product.metafields[meta_namespace][meta_key]
+
+    if book_metafield != blank
+      assign epub_source = book_metafield.value | strip
+    endif
+  endif
+%}
+
+<div
+  id="EpubSection-{{ section.id }}"
+  class="er-section"
+  style="
+    --er-width: {{ section.settings.max_width }}px;
+    --er-height: {{ section.settings.desktop_height }}px;
+    --er-mobile-height: {{ section.settings.mobile_height }}px;
+    --er-accent: {{ section.settings.accent_color }};
+  "
+>
+  {% if section.settings.heading != blank %}
+    <h2 class="er-heading">
+      {{ section.settings.heading | escape }}
+    </h2>
+  {% endif %}
+
+  {% if request.design_mode and section.settings.members_only %}
+    <p class="er-editor-note">
+      編輯器預覽已略過會員限制，正式頁面仍會檢查會員標籤。
+    </p>
+  {% endif %}
+
+  {% if reader_access %}
+    {% if epub_source != blank %}
+      <shopify-epub-reader
+        class="er-reader"
+        data-source="{{ epub_source | escape }}"
+        data-font="{{ section.settings.font_size }}"
+        data-remember="{{ section.settings.remember_position }}"
+      >
+        <div class="er-intro">
+          <p>在此閱讀電子書</p>
+          <button type="button" class="er-primary" data-start>
+            開始閱讀
+          </button>
+        </div>
+
+        <p class="er-status" data-status role="status" aria-live="polite">
+          點擊「開始閱讀」載入書籍。
+        </p>
+
+        <div class="er-workspace" data-workspace hidden>
+          <fieldset class="er-toolbar" data-controls disabled>
+            <legend class="er-sr-only">閱讀設定</legend>
+
+            <label class="er-toc-label">
+              <span>章節</span>
+              <select data-toc aria-label="選擇章節">
+                <option value="">正在載入目錄</option>
+              </select>
+            </label>
+
+            <div class="er-font-controls">
+              <button
+                type="button"
+                data-font-down
+                aria-label="縮小字體"
+              >A−</button>
+
+              <output data-font-value aria-live="polite"></output>
+
+              <button
+                type="button"
+                data-font-up
+                aria-label="放大字體"
+              >A＋</button>
+            </div>
+
+            <label>
+              <span class="er-sr-only">閱讀背景</span>
+              <select data-theme aria-label="閱讀背景">
+                <option value="light">白色</option>
+                <option value="sepia">米色</option>
+                <option value="dark">深色</option>
+              </select>
+            </label>
+          </fieldset>
+
+          <div
+            class="er-viewport"
+            data-viewport
+            tabindex="0"
+            role="region"
+            aria-label="電子書內容"
+            aria-busy="false"
+          ></div>
+
+          <div class="er-navigation">
+            <button type="button" data-prev disabled>上一頁</button>
+
+            <span class="er-location" data-location aria-live="polite">
+              載入中
+            </span>
+
+            <button type="button" data-next disabled>下一頁</button>
+          </div>
+        </div>
+
+        <noscript>
+          <p>請啟用瀏覽器 JavaScript 後閱讀電子書。</p>
+        </noscript>
+      </shopify-epub-reader>
+    {% else %}
+      <div class="er-message">
+        {% if request.design_mode %}
+          請在此 Section 設定中填入 EPUB 網址，
+          或在目前商品的指定 Metafield 填入網址。
+        {% else %}
+          電子書尚未提供。
+        {% endif %}
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="er-message">
+      <p>{{ section.settings.locked_message | escape }}</p>
+
+      {% unless customer %}
+        <a class="er-primary" href="{{ routes.account_login_url }}">
+          登入帳號
+        </a>
+      {% endunless %}
+    </div>
+  {% endif %}
+</div>
+
+{% stylesheet %}
+  .er-section {
+    max-width: var(--er-width);
+    margin: 32px auto;
+    padding: 0 16px;
+    color: #233040;
+  }
+
+  .er-section *,
+  .er-section *::before,
+  .er-section *::after {
+    box-sizing: border-box;
+  }
+
+  .er-section [hidden] {
+    display: none !important;
+  }
+
+  .er-heading {
+    margin: 0 0 18px;
+    font-size: clamp(22px, 3vw, 30px);
+    line-height: 1.4;
+    color: inherit;
+  }
+
+  .er-reader {
+    display: block;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #dce3eb;
+    border-radius: 14px;
+  }
+
+  .er-intro,
+  .er-message {
+    padding: 28px 20px;
+    text-align: center;
+    background: #f5f7fa;
+    border-radius: 12px;
+  }
+
+  .er-intro p,
+  .er-message p {
+    margin: 0 0 16px;
+  }
+
+  .er-section button,
+  .er-section select,
+  .er-primary {
+    min-height: 42px;
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.4;
+    border: 1px solid #cbd5df;
+    border-radius: 7px;
+  }
+
+  .er-section button {
+    padding: 9px 15px;
+    background: #fff;
+    color: #233040;
+    cursor: pointer;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
+  .er-section .er-primary {
+    display: inline-block;
+    padding: 11px 24px;
+    color: #fff;
+    background: var(--er-accent);
+    border-color: var(--er-accent);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .er-section button:disabled,
+  .er-section select:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+  }
+
+  .er-section button:focus-visible,
+  .er-section select:focus-visible,
+  .er-section a:focus-visible,
+  .er-viewport:focus-visible {
+    outline: 3px solid var(--er-accent);
+    outline-offset: 3px;
+  }
+
+  .er-status {
+    margin: 0;
+    padding: 10px 16px;
+    background: #f7f9fb;
+    color: #526273;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+
+  .er-status[data-error="true"] {
+    color: #a02525;
+    background: #fff3f3;
+  }
+
+  .er-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    min-width: 0;
+    margin: 0;
+    padding: 14px;
+    border: 0;
+    border-bottom: 1px solid #e4e9ef;
+    background: #f8fafc;
+  }
+
+  .er-toolbar label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .er-toc-label {
+    flex: 1 1 220px;
+    min-width: 0;
+  }
+
+  .er-section select {
+    max-width: 100%;
+    padding: 8px 28px 8px 10px;
+    background-color: #fff;
+    color: #233040;
+  }
+
+  .er-toc-label select {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .er-font-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .er-font-controls output {
+    min-width: 42px;
+    text-align: center;
+    font-size: 13px;
+  }
+
+  .er-viewport {
+    width: 100%;
+    height: var(--er-height);
+    min-width: 0;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .er-viewport iframe {
+    border: 0;
+    max-width: 100%;
+  }
+
+  .er-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-top: 1px solid #e4e9ef;
+    background: #f8fafc;
+  }
+
+  .er-navigation button {
+    flex-shrink: 0;
+  }
+
+  .er-location {
+    min-width: 0;
+    font-size: 13px;
+    color: #526273;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+
+  .er-editor-note {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #70531b;
+    background: #fff7df;
+    border-radius: 6px;
+  }
+
+  .er-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 749px) {
+    .er-section {
+      margin: 24px auto;
+      padding: 0 10px;
+    }
+
+    .er-toolbar {
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .er-toc-label {
+      flex-basis: 100%;
+    }
+
+    .er-viewport {
+      height: var(--er-mobile-height);
+    }
+
+    .er-navigation {
+      padding: 10px;
+      gap: 8px;
+    }
+
+    .er-navigation button {
+      padding: 9px 12px;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+(() => {
+  if (customElements.get('shopify-epub-reader')) return;
+
+  let dependencyPromise;
+
+  function loadScript(url) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = url;
+      script.async = true;
+
+      const timer = setTimeout(() => {
+        script.remove();
+        reject(new Error('閱讀器元件載入逾時，請重新整理後再試。'));
+      }, 25000);
+
+      script.onload = () => {
+        clearTimeout(timer);
+        resolve();
+      };
+
+      script.onerror = () => {
+        clearTimeout(timer);
+        script.remove();
+        reject(new Error('無法載入閱讀器元件，請檢查網路或內容封鎖設定。'));
+      };
+
+      document.head.appendChild(script);
+    });
+  }
+
+  function loadDependencies() {
+    if (!dependencyPromise) {
+      dependencyPromise = (async () => {
+        if (!window.JSZip) {
+          await loadScript(
+            'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js'
+          );
+        }
+
+        if (!window.ePub) {
+          await loadScript(
+            'https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js'
+          );
+        }
+
+        if (!window.JSZip || !window.ePub) {
+          throw new Error('閱讀器元件未正常啟動。');
+        }
+      })().catch(error => {
+        dependencyPromise = null;
+        throw error;
+      });
+    }
+
+    return dependencyPromise;
+  }
+
+  function withTimeout(promise, milliseconds, message) {
+    let timer;
+
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error(message)), milliseconds);
+      })
+    ]).finally(() => clearTimeout(timer));
+  }
+
+  class ShopifyEpubReader extends HTMLElement {
+    connectedCallback() {
+      if (this.initialized) return;
+      this.initialized = true;
+
+      this.setupFrame = requestAnimationFrame(() => this.setup());
+    }
+
+    setup() {
+      if (!this.isConnected) return;
+
+      this.events = new AbortController();
+      this.startButton = this.querySelector('[data-start]');
+      this.intro = this.querySelector('.er-intro');
+      this.status = this.querySelector('[data-status]');
+      this.workspace = this.querySelector('[data-workspace]');
+      this.controls = this.querySelector('[data-controls]');
+      this.viewport = this.querySelector('[data-viewport]');
+      this.toc = this.querySelector('[data-toc]');
+      this.previousButton = this.querySelector('[data-prev]');
+      this.nextButton = this.querySelector('[data-next]');
+      this.locationLabel = this.querySelector('[data-location]');
+      this.themeSelect = this.querySelector('[data-theme]');
+      this.fontValue = this.querySelector('[data-font-value]');
+      this.fontDown = this.querySelector('[data-font-down]');
+      this.fontUp = this.querySelector('[data-font-up]');
+      this.fontSize = Number(this.dataset.font) || 18;
+      this.remember = this.dataset.remember === 'true';
+
+      const options = { signal: this.events.signal };
+
+      this.startButton.addEventListener('click', () => this.start(), options);
+      this.previousButton.addEventListener('click', () => this.move('prev'), options);
+      this.nextButton.addEventListener('click', () => this.move('next'), options);
+
+      this.toc.addEventListener('change', () => {
+        if (this.toc.value) this.navigate(() => this.rendition.display(this.toc.value));
+      }, options);
+
+      this.fontDown.addEventListener('click', () => this.changeFont(-2), options);
+      this.fontUp.addEventListener('click', () => this.changeFont(2), options);
+
+      this.themeSelect.addEventListener('change', () => {
+        this.applyTheme();
+        this.savePosition();
+      }, options);
+
+      this.addEventListener('keydown', event => this.handleKey(event), options);
+      this.updateFontControls();
+    }
+
+    setStatus(message, error = false) {
+      this.status.textContent = message;
+      this.status.dataset.error = String(error);
+    }
+
+    async start() {
+      if (this.loading || this.ready) return;
+
+      this.loading = true;
+      this.startButton.disabled = true;
+      this.setStatus('正在載入電子書，較大的檔案需要稍候。');
+
+      const attempt = {};
+      this.attempt = attempt;
+      let fetchTimer;
+
+      try {
+        const source = new URL(this.dataset.source, window.location.href);
+
+        if (!['https:', 'http:'].includes(source.protocol)) {
+          throw new Error('請使用有效的 HTTPS EPUB 網址。');
+        }
+
+        if (location.protocol === 'https:' && source.protocol !== 'https:') {
+          throw new Error('電子書網址需要使用 HTTPS。');
+        }
+
+        await loadDependencies();
+        if (!this.isConnected || this.attempt !== attempt) return;
+
+        this.request = new AbortController();
+        fetchTimer = setTimeout(() => this.request.abort(), 60000);
+
+        const response = await fetch(source.href, {
+          signal: this.request.signal,
+          credentials: 'same-origin'
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            response.status === 401 || response.status === 403
+              ? '目前沒有讀取此電子書的權限，請確認登入狀態。'
+              : '電子書載入失敗，請確認檔案網址。HTTP ' + response.status
+          );
+        }
+
+        const buffer = await response.arrayBuffer();
+        clearTimeout(fetchTimer);
+
+        if (!this.isConnected || this.attempt !== attempt) return;
+
+        const signature = new Uint8Array(buffer, 0, Math.min(2, buffer.byteLength));
+
+        if (signature[0] !== 0x50 || signature[1] !== 0x4b) {
+          throw new Error('網址沒有回傳 EPUB 檔案，請勿使用商品頁或下載頁網址。');
+        }
+
+        this.book = window.ePub();
+
+        await withTimeout(
+          this.book.open(buffer, 'binary'),
+          30000,
+          '電子書解析逾時，請確認 EPUB 格式是否正常。'
+        );
+
+        if (!this.isConnected || this.attempt !== attempt) return;
+
+        this.storageKey = 'shopify_epub_reader_v1:' + this.book.key();
+        const saved = this.readPosition();
+
+        if (saved && Number.isFinite(saved.font)) {
+          this.fontSize = Math.max(14, Math.min(32, saved.font));
+        }
+
+        if (saved && ['light', 'sepia', 'dark'].includes(saved.theme)) {
+          this.themeSelect.value = saved.theme;
+        }
+
+        this.workspace.hidden = false;
+
+        this.rendition = this.book.renderTo(this.viewport, {
+          width: '100%',
+          height: '100%',
+          flow: 'paginated',
+          spread: 'none',
+          allowScriptedContent: false,
+          allowPopups: false
+        });
+
+        this.rendition.on('relocated', location => this.onRelocated(location));
+        this.rendition.on('keydown', event => this.handleKey(event));
+
+        this.rendition.hooks.content.register(contents => {
+          const doc = contents.document;
+          doc.documentElement.setAttribute('lang',
+            doc.documentElement.getAttribute('lang') || 'zh-Hant'
+          );
+        });
+
+        this.applyTheme();
+        this.rendition.themes.fontSize(this.fontSize + 'px');
+        this.updateFontControls();
+
+        const navigation = await withTimeout(
+          this.book.loaded.navigation,
+          15000,
+          '無法讀取電子書目錄。'
+        );
+
+        if (!this.isConnected || this.attempt !== attempt) return;
+
+        this.buildToc(navigation.toc || []);
+
+        if (saved && typeof saved.cfi === 'string') {
+          try {
+            await withTimeout(
+              this.rendition.display(saved.cfi),
+              20000,
+              '無法恢復上次的閱讀位置。'
+            );
+          } catch (_) {
+            await withTimeout(
+              this.rendition.display(),
+              20000,
+              '無法顯示電子書內容。'
+            );
+          }
+        } else {
+          await withTimeout(
+            this.rendition.display(),
+            20000,
+            '無法顯示電子書內容。'
+          );
+        }
+
+        if (!this.isConnected || this.attempt !== attempt) return;
+
+        this.ready = true;
+        this.controls.disabled = false;
+        this.intro.hidden = true;
+        this.updateNavigation();
+
+        this.setStatus(
+          this.remember
+            ? '可使用章節目錄或翻頁按鈕閱讀，閱讀位置會保存在此瀏覽器。'
+            : '可使用章節目錄或翻頁按鈕閱讀。'
+        );
+
+        if ('ResizeObserver' in window) {
+          this.resizeObserver = new ResizeObserver(() => {
+            clearTimeout(this.resizeTimer);
+            this.resizeTimer = setTimeout(() => {
+              if (this.ready && this.rendition && this.viewport.clientWidth > 0) {
+                this.rendition.resize(
+                  this.viewport.clientWidth,
+                  this.viewport.clientHeight
+                );
+              }
+            }, 120);
+          });
+
+          this.resizeObserver.observe(this.viewport);
+        }
+      } catch (error) {
+        if (!this.isConnected || this.attempt !== attempt) return;
+
+        this.destroyBook();
+        this.workspace.hidden = true;
+        this.intro.hidden = false;
+        this.startButton.textContent = '重新載入';
+
+        let message = error.message || '電子書載入失敗。';
+
+        if (error.name === 'AbortError') {
+          message = '下載逾時，請檢查網路後再試。';
+        } else if (error instanceof TypeError) {
+          message = '無法取得檔案，請檢查網址、網路及檔案服務的跨網域讀取設定。';
+        }
+
+        this.setStatus(message, true);
+      } finally {
+        clearTimeout(fetchTimer);
+
+        if (this.attempt === attempt) {
+          this.loading = false;
+          this.startButton.disabled = false;
+        }
+      }
+    }
+
+    buildToc(items) {
+      this.toc.replaceChildren();
+
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = items.length ? '選擇章節' : '本書未提供目錄';
+      this.toc.appendChild(placeholder);
+
+      const append = (entries, depth) => {
+        entries.forEach(item => {
+          if (item.href) {
+            const option = document.createElement('option');
+            option.value = item.href;
+            option.textContent =
+              '　'.repeat(Math.min(depth, 5)) +
+              String(item.label || '未命名章節').trim();
+            this.toc.appendChild(option);
+          }
+
+          if (item.subitems && item.subitems.length) {
+            append(item.subitems, depth + 1);
+          }
+        });
+      };
+
+      append(items, 0);
+      this.toc.disabled = this.toc.options.length < 2;
+    }
+
+    handleKey(event) {
+      const target = event.target;
+      if (
+        event.defaultPrevented ||
+        event.ctrlKey || event.metaKey || event.altKey || event.shiftKey ||
+        (target && target.closest &&
+          target.closest('input, textarea, select, button, a, [contenteditable]'))
+      ) return;
+
+      if (!this.ready) return;
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+
+      event.preventDefault();
+      const rtl = this.book.packaging.metadata.direction === 'rtl';
+      const forward = rtl ? event.key === 'ArrowLeft' : event.key === 'ArrowRight';
+      this.move(forward ? 'next' : 'prev');
+    }
+
+    async navigate(action) {
+      if (!this.ready || this.navigating) return;
+
+      this.navigating = true;
+      this.controls.disabled = true;
+      this.viewport.setAttribute('aria-busy', 'true');
+      this.updateNavigation();
+
+      try {
+        await action();
+      } catch (_) {
+        if (this.isConnected) {
+          this.setStatus('無法切換至指定位置，請選擇其他章節或重新載入頁面。', true);
+        }
+      } finally {
+        this.navigating = false;
+
+        if (this.isConnected) {
+          this.controls.disabled = false;
+          this.viewport.setAttribute('aria-busy', 'false');
+          this.updateNavigation();
+        }
+      }
+    }
+
+    move(direction) {
+      if (!this.rendition) return;
+      if (direction === 'prev' && this.location && this.location.atStart) return;
+      if (direction === 'next' && this.location && this.location.atEnd) return;
+
+      this.navigate(() => this.rendition[direction]());
+    }
+
+    onRelocated(location) {
+      if (!this.isConnected) return;
+
+      this.location = location;
+      const start = location.start;
+
+      if (start) {
+        const current = Number(start.index) + 1;
+        const total = this.book.spine.spineItems.length;
+
+        this.locationLabel.textContent =
+          '書籍區段 ' + current + ' / ' + total;
+
+        this.savePosition();
+
+        const href = String(start.href || '').split('#')[0];
+        const options = Array.from(this.toc.options);
+        const match = options.find(option =>
+          option.value && option.value.split('#')[0] === href
+        );
+
+        this.toc.value = match ? match.value : '';
+      }
+
+      this.updateNavigation();
+    }
+
+    updateNavigation() {
+      const disabled = !this.ready || this.navigating;
+
+      this.previousButton.disabled =
+        disabled || Boolean(this.location && this.location.atStart);
+
+      this.nextButton.disabled =
+        disabled || Boolean(this.location && this.location.atEnd);
+    }
+
+    changeFont(delta) {
+      if (!this.ready || this.navigating) return;
+
+      this.fontSize = Math.max(14, Math.min(32, this.fontSize + delta));
+      this.rendition.themes.fontSize(this.fontSize + 'px');
+      this.updateFontControls();
+      this.savePosition();
+    }
+
+    updateFontControls() {
+      this.fontValue.textContent = this.fontSize + 'px';
+      this.fontDown.disabled = this.fontSize <= 14;
+      this.fontUp.disabled = this.fontSize >= 32;
+    }
+
+    applyTheme() {
+      if (!this.rendition) return;
+
+      const palettes = {
+        light: { background: '#ffffff', text: '#202934', link: '#1659a5' },
+        sepia: { background: '#f6efdf', text: '#433a2e', link: '#72501e' },
+        dark: { background: '#20252b', text: '#e3e8ee', link: '#96c8ff' }
+      };
+
+      const palette = palettes[this.themeSelect.value] || palettes.light;
+
+      this.viewport.style.backgroundColor = palette.background;
+
+      this.rendition.themes.default({
+        'html': {
+          'background': palette.background + ' !important'
+        },
+        'body': {
+          'background': palette.background + ' !important',
+          'color': palette.text + ' !important',
+          'line-height': '1.8 !important',
+          'overflow-wrap': 'break-word'
+        },
+        'p, div, span, li, h1, h2, h3, h4, h5, h6, blockquote': {
+          'color': palette.text + ' !important'
+        },
+        'a': {
+          'color': palette.link + ' !important'
+        },
+        'img, svg, video': {
+          'max-width': '100% !important',
+          'max-height': '100% !important',
+          'object-fit': 'contain'
+        }
+      });
+    }
+
+    readPosition() {
+      if (!this.remember || !this.storageKey) return null;
+
+      try {
+        return JSON.parse(localStorage.getItem(this.storageKey));
+      } catch (_) {
+        return null;
+      }
+    }
+
+    savePosition() {
+      if (!this.remember || !this.storageKey) return;
+
+      const start = this.location && this.location.start;
+      if (!start || !start.cfi) return;
+
+      try {
+        localStorage.setItem(this.storageKey, JSON.stringify({
+          cfi: start.cfi,
+          font: this.fontSize,
+          theme: this.themeSelect.value
+        }));
+      } catch (_) {
+        // 瀏覽器不允許儲存時，仍可正常閱讀。
+      }
+    }
+
+    destroyBook() {
+      this.ready = false;
+      this.location = null;
+
+      if (this.resizeObserver) this.resizeObserver.disconnect();
+      clearTimeout(this.resizeTimer);
+
+      try {
+        if (this.rendition) this.rendition.destroy();
+      } catch (_) {}
+
+      try {
+        if (this.book) this.book.destroy();
+      } catch (_) {}
+
+      this.rendition = null;
+      this.book = null;
+
+      if (this.viewport) this.viewport.replaceChildren();
+    }
+
+    disconnectedCallback() {
+      this.savePosition();
+      this.attempt = null;
+      cancelAnimationFrame(this.setupFrame);
+
+      if (this.events) this.events.abort();
+      if (this.request) this.request.abort();
+
+      this.destroyBook();
+      this.loading = false;
+      this.navigating = false;
+      this.initialized = false;
+    }
+  }
+
+  customElements.define('shopify-epub-reader', ShopifyEpubReader);
+})();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "EPUB 電子書閱讀器",
+  "tag": "section",
+  "class": "section-epub-reader",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "標題",
+      "default": "線上閱讀"
+    },
+    {
+      "type": "header",
+      "content": "電子書來源"
+    },
+    {
+      "type": "url",
+      "id": "epub_url",
+      "label": "EPUB 檔案網址",
+      "info": "貼入 Shopify 檔案中的 EPUB 直接網址，不是商品頁或下載頁網址。"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_metafield",
+      "label": "優先讀取商品 Metafield",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "meta_namespace",
+      "label": "Metafield 命名空間",
+      "default": "custom"
+    },
+    {
+      "type": "text",
+      "id": "meta_key",
+      "label": "Metafield 索引鍵",
+      "default": "epub_url",
+      "info": "使用 URL 或單行文字類型。商品欄位沒有內容時，改用上方 EPUB 網址。"
+    },
+    {
+      "type": "header",
+      "content": "閱讀介面"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "最大寬度",
+      "min": 600,
+      "max": 1600,
+      "step": 50,
+      "unit": "px",
+      "default": 1100
+    },
+    {
+      "type": "range",
+      "id": "desktop_height",
+      "label": "桌面閱讀區高度",
+      "min": 400,
+      "max": 1000,
+      "step": 20,
+      "unit": "px",
+      "default": 640
+    },
+    {
+      "type": "range",
+      "id": "mobile_height",
+      "label": "手機閱讀區高度",
+      "min": 300,
+      "max": 800,
+      "step": 20,
+      "unit": "px",
+      "default": 500
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "預設字體大小",
+      "min": 14,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "主要按鈕顏色",
+      "default": "#173b63"
+    },
+    {
+      "type": "checkbox",
+      "id": "remember_position",
+      "label": "記住閱讀位置與設定",
+      "default": true,
+      "info": "儲存在同一瀏覽器，不會跨裝置同步。"
+    },
+    {
+      "type": "header",
+      "content": "會員限制"
+    },
+    {
+      "type": "checkbox",
+      "id": "members_only",
+      "label": "僅指定會員標籤可閱讀",
+      "default": false,
+      "info": "只控制頁面顯示，不會保護公開檔案網址。"
+    },
+    {
+      "type": "text",
+      "id": "member_tags",
+      "label": "允許的顧客標籤",
+      "default": "hv-mem,spons-mem",
+      "info": "使用英文逗號分隔，符合任一標籤即可閱讀。"
+    },
+    {
+      "type": "text",
+      "id": "locked_message",
+      "label": "無權限提示文字",
+      "default": "此電子書僅開放指定會員閱讀，請使用具有會員資格的帳號登入。"
+    }
+  ],
+  "presets": [
+    {
+      "name": "EPUB 電子書閱讀器"
+    }
+  ]
+}
+{% endschema %}
