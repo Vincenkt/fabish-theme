@@ -95,7 +95,7 @@
               <button type="button" data-next disabled>下一頁</button>
             </div>
           </div>
-          <p class="er-full-hint" data-full-hint role="status" aria-live="polite" hidden>點中間區域呼叫選單</p>
+          <p class="er-full-hint" data-full-hint role="status" aria-live="polite" hidden>點中間區域呼叫選單<br>點擊螢幕左右邊翻頁</p>
           <noscript><p>請啟用 JavaScript 後閱讀電子書。</p></noscript>
         </div>
       </shopify-epub-reader-v3>
@@ -165,7 +165,11 @@
   .er-full .er-status,.er-full .er-intro {display:none!important}
   .er-full .er-workspace {position:relative;width:100%;max-width:var(--er-reading-width,100%);height:100%;margin:0 auto}
   .er-full .er-stage {width:100%;height:100%}
-  .er-full-hint {position:absolute;top:max(12px,env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:8;max-width:calc(100% - 24px);margin:0;padding:10px 18px;border:1px solid rgba(var(--er-accent-rgb),.16);border-radius:10px;background:rgba(248,250,252,.96);color:#233040;font-size:14px;text-align:center;box-shadow:0 3px 18px rgba(20,40,60,.12);pointer-events:none}
+  .er-full-hint {position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:8;width:max-content;max-width:calc(100% - 24px);margin:0;padding:18px 22px;border:1px solid rgba(var(--er-accent-rgb),.16);border-radius:10px;background:rgba(248,250,252,.96);color:#233040;font-size:var(--er-hint-font,18px);line-height:1.8;text-align:center;box-shadow:0 3px 18px rgba(20,40,60,.12);pointer-events:none}
+  .er-full.er-show-zones .er-hit {background:rgba(var(--er-accent-rgb),.09);box-shadow:inset 0 0 0 1px rgba(var(--er-accent-rgb),.12)}
+  .er-full.er-show-zones .er-hit .er-hit-icon {opacity:1}
+  .er-full.er-show-zones .er-hit:disabled {background:rgba(var(--er-accent-rgb),.04)}
+  .er-full.er-show-zones .er-hit:disabled .er-hit-icon {opacity:.35}
   .er-full .er-menu {position:absolute;left:0;right:0;z-index:6;visibility:hidden;opacity:0;pointer-events:none;transition:opacity .16s ease,visibility .16s ease;background:rgba(248,250,252,.97);box-shadow:0 4px 24px rgba(20,40,60,.1)}
   .er-full .er-menu-top {top:0;padding-top:env(safe-area-inset-top,0px);max-height:65%;overflow:auto}
   .er-full .er-navigation {bottom:0;padding-bottom:max(12px,env(safe-area-inset-bottom,0px))}
@@ -340,7 +344,7 @@
       if (!this.isConnected || !this.book) return;
       this.position = value;
       if (value.start) {
-        this.ui.location.textContent = '位於索引章節 ' + (Number(value.start.index)+1) + ' / ' + this.book.spine.spineItems.length;
+        this.ui.location.textContent = '位於索引章節 ' + (Number(value.start.index)+1) + ' / ' + Math.max(1,this.book.spine.spineItems.length - 1);
         const href = String(value.start.href || '').split('#')[0];
         const match = Array.from(this.ui.toc.options).find(option => option.value && option.value.split('#')[0] === href);
         this.ui.toc.value = match ? match.value : '';
@@ -407,6 +411,7 @@
       this.updateFont(); this.savePosition();
     }
     updateFont() {
+      this.shell.style.setProperty('--er-hint-font',this.font + 'px');
       this.ui['font-value'].textContent = this.font + 'px';
       this.ui['font-down'].disabled = this.font <= 14;
       this.ui['font-up'].disabled = this.font >= 32;
@@ -441,8 +446,12 @@
     }
     showFullscreenHint() {
       clearTimeout(this.hintTimer);
+      this.shell.classList.add('er-show-zones');
       this.ui['full-hint'].hidden = false;
-      this.hintTimer = setTimeout(() => {this.ui['full-hint'].hidden = true;},5000);
+      this.hintTimer = setTimeout(() => {
+        this.ui['full-hint'].hidden = true;
+        this.shell.classList.remove('er-show-zones');
+      },5000);
     }
     async toggleFullscreen() {
       if(this.full) {await this.exitFullscreen();return;}
@@ -504,7 +513,7 @@
       clearTimeout(this.hintTimer); this.ui['full-hint'].hidden = true;
       this.full = false; this.native = false;
       this.shell.style.removeProperty('--er-reading-width');
-      this.shell.classList.remove('er-full','er-menu-open');
+      this.shell.classList.remove('er-full','er-menu-open','er-show-zones');
       this.ui.center.hidden = true; this.ui['fs-hint'].hidden = true;
       this.ui.fullscreen.textContent = '全螢幕';
       this.setMenu(false);
