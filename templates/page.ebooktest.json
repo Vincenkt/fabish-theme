@@ -38,10 +38,31 @@
         "member_tags": "hv-mem,spons-mem",
         "locked_message": "此電子書僅開放指定會員閱讀，請使用具有會員資格的帳號登入。"
       }
+    },
+    "custom_liquid_cCptVa": {
+      "type": "custom-liquid",
+      "name": "t:sections.custom-liquid.presets.name",
+      "settings": {
+        "page_full_width": false,
+        "page_full_width_spacing": false,
+        "title": "",
+        "heading_size": "h1",
+        "sub_heading": "Sub Heading",
+        "description": "Use This Text To Share The Information Which You Like!.",
+        "button_label": "Button label",
+        "button_link": "",
+        "button_style_secondary": false,
+        "column_alignment": "center",
+        "custom_liquid": "<script>\n  if (!window.shopifyContextMenuBlocked) {\n    window.shopifyContextMenuBlocked = true;\n\n    document.addEventListener('contextmenu', function (event) {\n      event.preventDefault();\n    }, true);\n  }\n</script>",
+        "color_scheme": "background-1",
+        "padding_top": 40,
+        "padding_bottom": 52
+      }
     }
   },
   "order": [
     "main",
-    "custom_epub_reader_C78xkY"
+    "custom_epub_reader_C78xkY",
+    "custom_liquid_cCptVa"
   ]
 }
