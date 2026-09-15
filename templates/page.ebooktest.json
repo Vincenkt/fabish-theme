@@ -17,9 +17,30 @@
         "padding_top": 100,
         "padding_bottom": 40
       }
+    },
+    "custom_epub_reader_C78xkY": {
+      "type": "custom-epub-reader",
+      "name": "EPUB 電子書閱讀器",
+      "settings": {
+        "heading": "線上閱讀",
+        "epub_url": "https://cdn.shopify.com/s/files/1/0634/2970/5794/files/e295989513cb0aeec91ac75bfba91524.epub?v=1789439406",
+        "use_metafield": false,
+        "meta_namespace": "custom",
+        "meta_key": "epub_url",
+        "max_width": 1100,
+        "desktop_height": 640,
+        "mobile_height": 500,
+        "font_size": 18,
+        "accent_color": "#173b63",
+        "remember_position": true,
+        "members_only": false,
+        "member_tags": "hv-mem,spons-mem",
+        "locked_message": "此電子書僅開放指定會員閱讀，請使用具有會員資格的帳號登入。"
+      }
     }
   },
   "order": [
-    "main"
+    "main",
+    "custom_epub_reader_C78xkY"
   ]
 }
