@@ -24,7 +24,7 @@
       "name": "EPUB 電子書閱讀器",
       "settings": {
         "heading": "線上閱讀",
-        "epub_url": "https://cdn.shopify.com/s/files/1/0634/2970/5794/files/e295989513cb0aeec91ac75bfba91524.epub?v=1789439406",
+        "epub_url": "https://xktest.b-cdn.net/裸體的共產黨 增補版（上）.epub",
         "use_metafield": false,
         "meta_namespace": "custom",
         "meta_key": "epub_url",
