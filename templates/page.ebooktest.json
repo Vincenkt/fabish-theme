@@ -58,11 +58,32 @@
         "padding_top": 40,
         "padding_bottom": 52
       }
+    },
+    "custom_liquid_7gtkPY": {
+      "type": "custom-liquid",
+      "name": "t:sections.custom-liquid.presets.name",
+      "settings": {
+        "page_full_width": false,
+        "page_full_width_spacing": false,
+        "title": "Custom Liquid",
+        "heading_size": "h1",
+        "sub_heading": "Sub Heading",
+        "description": "Use This Text To Share The Information Which You Like!.",
+        "button_label": "Button label",
+        "button_link": "",
+        "button_style_secondary": false,
+        "column_alignment": "center",
+        "custom_liquid": "https://player.mediadelivery.net/play/756408/5b104200-ad1b-41b8-9396-692f61f7afc7",
+        "color_scheme": "background-1",
+        "padding_top": 40,
+        "padding_bottom": 52
+      }
     }
   },
   "order": [
     "main",
     "custom_epub_reader_C78xkY",
-    "custom_liquid_cCptVa"
+    "custom_liquid_cCptVa",
+    "custom_liquid_7gtkPY"
   ]
 }
