@@ -17,15 +17,22 @@
     assign bought_tag = 'bought-' | append: target_product.handle
   endif
   if customer
-    if customer.tags contains 'hv-mem'
+    if customer.tags contains '鑽石年度會員'
       assign has_access = true
-    elsif customer.tags contains 'spons-mem'
+    elsif customer.tags contains 'Gold-member'
+      assign has_access = true
+    elsif customer.tags contains '總統級'
+      assign has_access = true
+    elsif customer.tags contains '部長級'
+      assign has_access = true
+    elsif customer.tags contains '議員級'
       assign has_access = true
     elsif bought_tag != blank and customer.tags contains bought_tag
       assign has_access = true
     endif
   endif
   assign book_text = target_product.metafields.custom.eb.value | default: '' | strip
+  assign description_text = target_product.metafields.custom.des.value | default: '' | strip
   assign media_text = target_product.metafields.custom.viau.value | default: '' | strip
   assign book_entries = book_text | split: ','
   assign media_entries = media_text | split: ','
@@ -55,7 +62,7 @@
 --er-accent:{{ section.settings.accent_color }};
 --er-accent-rgb:{{ section.settings.accent_color | color_extract: 'red' }},{{ section.settings.accent_color | color_extract: 'green' }},{{ section.settings.accent_color | color_extract: 'blue' }};
 {% endcapture %}
-{% if book_count > 0 or media_count > 0 %}
+{% if book_count > 0 or media_count > 0 or description_text != blank %}
 <div class="member-media-library" style="{{ reader_style | strip_newlines | escape }}">
 {% if has_access %}
 {% if book_count > 0 %}
@@ -68,33 +75,17 @@
         data-remember="{{ section.settings.remember_position }}"
       >
         <div class="er-shell" style="{{ reader_style | strip_newlines | escape }}" role="region" aria-label="電子書閱讀器">
-          <div class="er-intro" data-intro>
-            {% if book_count > 1 %}
-<nav class="er-books" aria-label="選擇電子書">
-  {% assign book_number = 0 %}
-  {% for entry in book_entries %}
-    {% assign book_url = entry | strip %}
-    {% if book_url != blank %}
-      {% assign book_number = book_number | plus: 1 %}
-      <button type="button" data-book-source="{{ book_url | escape }}" data-book-index="{{ book_number }}" aria-pressed="{% if book_number == 1 %}true{% else %}false{% endif %}">第 {{ book_number }} 本</button>
-    {% endif %}
-  {% endfor %}
-</nav>
-{% endif %}
-<p>在此閱讀電子書</p>
-            <button type="button" class="er-primary" data-start>開始閱讀</button>
-          </div>
           <p class="er-status" data-status role="status" aria-live="polite">點擊「開始閱讀」載入書籍。</p>
-          <div class="er-workspace" data-workspace hidden>
+          <div class="er-workspace" data-workspace>
             <div class="er-menu er-menu-top" data-top>
-{% if book_count > 1 %}
+{% if book_count > 0 %}
 <nav class="er-books" aria-label="選擇電子書">
   {% assign book_number = 0 %}
   {% for entry in book_entries %}
     {% assign book_url = entry | strip %}
     {% if book_url != blank %}
       {% assign book_number = book_number | plus: 1 %}
-      <button type="button" data-book-source="{{ book_url | escape }}" data-book-index="{{ book_number }}" aria-pressed="{% if book_number == 1 %}true{% else %}false{% endif %}">第 {{ book_number }} 本</button>
+      <button type="button" data-book-source="{{ book_url | escape }}" data-book-index="{{ book_number }}" aria-pressed="{% if book_number == 1 %}true{% else %}false{% endif %}">{{ book_url | split: '?' | first | split: '#' | first | split: '/' | last | url_decode | remove: '.epub' | escape }}</button>
     {% endif %}
   {% endfor %}
 </nav>
@@ -118,6 +109,10 @@
               <p class="er-menu-hint" data-fs-hint hidden>點中央空白區收起選單；左右兩側點擊翻頁。</p>
             </div>
             <div class="er-stage">
+              <div class="er-intro" data-intro>
+                <p>在此閱讀電子書</p>
+                <button type="button" class="er-primary" data-start>開始閱讀</button>
+              </div>
               <div class="er-viewport" data-viewport role="region" aria-label="電子書內容" aria-busy="false"></div>
               <button class="er-hit er-hit-left" type="button" data-left aria-label="上一頁" disabled>
                 <span class="er-hit-icon" aria-hidden="true">‹</span>
@@ -138,6 +133,9 @@
         </div>
       </member-epub-reader-v4>
 </div>
+{% endif %}
+{% if description_text != blank %}
+<div class="er-section mm-description"><p>{{ description_text | escape }}</p></div>
 {% endif %}
 {% if media_count > 0 %}
 <div class="er-section mm-media-section">
@@ -269,6 +267,21 @@ member-bunny-playlist {display:block}
 .mm-playlist button:focus-visible {outline:2px solid var(--er-accent);outline-offset:2px}
 @media(max-width:749px) {.mm-media-layout.mm-has-list {grid-template-columns:minmax(0,1fr)}}
 
+
+/* Compact until the first successful display; subsequent loads retain the reading area. */
+.er-shell:not(.er-expanded) .er-stage {height:160px;overflow:hidden}
+.er-shell:not(.er-expanded) .er-toolbar,
+.er-shell:not(.er-expanded) .er-navigation {display:none}
+.er-shell:not(.er-expanded) .er-viewport {height:var(--er-height);visibility:hidden}
+@media(max-width:749px) {.er-shell:not(.er-expanded) .er-viewport {height:var(--er-mobile-height)}}
+.er-stage > .er-intro {position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:0}
+.er-loading .er-viewport {visibility:hidden}
+.er-status {height:60px;overflow:auto;box-sizing:border-box}
+.er-books {min-height:66px;box-sizing:border-box}
+.er-books button {max-width:min(70vw,420px);overflow:hidden;text-overflow:ellipsis}
+.er-shell {overflow-anchor:none}
+.mm-description p {margin:0;line-height:1.8;overflow-wrap:anywhere}
+
 {% endstylesheet %}
 {% javascript %}
 
@@ -336,6 +349,16 @@ member-bunny-playlist {display:block}
       on(document,'fullscreenchange',() => this.fullscreenChanged());
       on(document,'webkitfullscreenchange',() => this.fullscreenChanged());
       this.bookIndex = '1';
+      this.shell.querySelectorAll('[data-book-source]').forEach(button => {
+        let name = '';
+        try {
+          name = new URL(button.dataset.bookSource, location.href).pathname.split('/').pop();
+          try {name = decodeURIComponent(name);} catch (_) {}
+        } catch (_) {}
+        name = name.replace(/\.[^.]+$/, '') || '未命名電子書';
+        button.textContent = name;
+        button.title = name;
+      });
       on(this.shell,'click',event => {
         const button = event.target.closest('[data-book-source]');
         if (button) this.selectBook(button);
@@ -359,7 +382,7 @@ member-bunny-playlist {display:block}
         this.dataset.source = source;
         this.bookIndex = button.dataset.bookIndex;
         this.ui.theme.value = 'light';
-        this.ui.workspace.hidden = true;
+        this.ui.workspace.hidden = false;
         this.ui.intro.hidden = false;
         this.ui.start.disabled = false;
         this.ui.start.textContent = '開始閱讀';
@@ -380,6 +403,9 @@ member-bunny-playlist {display:block}
     async start() {
       if (this.loading || this.ready) return;
       this.loading = true; this.ui.start.disabled = true;
+      this.shell.classList.add('er-loading');
+      this.ui.start.textContent = '正在載入…';
+      this.shell.setAttribute('aria-busy','true');
       const token = {}; this.token = token;
       const alive = () => this.isConnected && this.token === token;
       let timer;
@@ -433,6 +459,7 @@ member-bunny-playlist {display:block}
           await limitTime(this.rendition.display(),20000,'無法顯示書籍。');
         }
         if (!alive()) return;
+        this.shell.classList.add('er-expanded');
         this.ready = true; this.ui.controls.disabled = false; this.ui.intro.hidden = true;
         this.message('單頁閱讀｜點左右兩側翻頁；全螢幕時點中央開啟選單。');
         this.updateButtons();
@@ -443,12 +470,12 @@ member-bunny-playlist {display:block}
         }
       } catch(error) {
         if (!alive()) return;
-        this.destroyBook(); this.ui.workspace.hidden = true; this.ui.intro.hidden = false;
+        this.destroyBook(); this.ui.workspace.hidden = false; this.ui.intro.hidden = false;
         this.ui.start.textContent = '重新載入';
         this.message(error.name === 'AbortError' ? '下載逾時，請檢查網路後再試。' : error instanceof TypeError ? '無法讀取 EPUB，請檢查網址、網路與跨網域讀取設定。' : error.message,true);
       } finally {
         clearTimeout(timer);
-        if (this.token === token) {this.loading = false;this.ui.start.disabled = false;}
+        if (this.token === token) {this.loading = false;this.ui.start.disabled = false;this.shell.classList.remove('er-loading');this.shell.setAttribute('aria-busy','false');}
       }
     }
     buildToc(items) {
@@ -749,7 +776,7 @@ member-bunny-playlist {display:block}
     },
     {
       "type": "paragraph",
-      "content": "讀取 custom.eb（EPUB 網址）與 custom.viau（影片庫ID/素材ID），皆以英文逗號分隔。空白欄位不顯示。多本電子書點擊選書才下載。"
+      "content": "讀取 custom.eb（EPUB 網址）與 custom.viau（影片庫ID/素材ID），皆以英文逗號分隔。空白欄位不顯示。電子書點擊才下載；custom.des 為閱讀區與影音區之間的說明文字。"
     },
     {
       "type": "range",
