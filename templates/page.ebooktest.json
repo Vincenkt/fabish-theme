@@ -73,7 +73,7 @@
         "button_link": "",
         "button_style_secondary": false,
         "column_alignment": "center",
-        "custom_liquid": "<div style=\"width:100%;max-width:1000px;margin:0 auto;\">\n  <iframe\n    src=\"https://player.mediadelivery.net/embed/756408/07200ffc-bb0e-49b0-b557-3dfba245e613?autoplay=true&loop=false&muted=true&preload=true&responsive=true\"\n    title=\"影片播放器\"\n    loading=\"lazy\"\n    style=\"display:block;width:100%;aspect-ratio:16/9;border:0;\"\n    allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen\"\n    allowfullscreen>\n  </iframe>\n</div>",
+        "custom_liquid": "<div style=\"width:100%;max-width:1000px;margin:0 auto;\">\n  <iframe\n    src=\"https://player.mediadelivery.net/embed/756408/5b104200-ad1b-41b8-9396-692f61f7afc7?autoplay=false&loop=false&muted=false&preload=true&responsive=true\"\n    title=\"影片播放器\"\n    loading=\"lazy\"\n    style=\"display:block;width:100%;aspect-ratio:16/9;border:0;\"\n    allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen\"\n    allowfullscreen>\n  </iframe>\n</div>",
         "color_scheme": "background-1",
         "padding_top": 40,
         "padding_bottom": 52
