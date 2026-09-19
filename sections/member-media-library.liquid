@@ -17,15 +17,9 @@
     assign bought_tag = 'bought-' | append: target_product.handle
   endif
   if customer
-    if customer.tags contains '鑽石年度會員'
+    if customer.tags contains 'hv-mem'
       assign has_access = true
-    elsif customer.tags contains 'Gold-member'
-      assign has_access = true
-    elsif customer.tags contains '總統級'
-      assign has_access = true
-    elsif customer.tags contains '部長級'
-      assign has_access = true
-    elsif customer.tags contains '議員級'
+    elsif customer.tags contains 'spons-mem'
       assign has_access = true
     elsif bought_tag != blank and customer.tags contains bought_tag
       assign has_access = true
