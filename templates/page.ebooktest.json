@@ -21,6 +21,7 @@
     },
     "custom_epub_reader_C78xkY": {
       "type": "custom-epub-reader",
+      "disabled": true,
       "name": "EPUB 電子書閱讀器",
       "settings": {
         "heading": "線上閱讀",
@@ -41,6 +42,7 @@
     },
     "custom_liquid_cCptVa": {
       "type": "custom-liquid",
+      "disabled": true,
       "name": "t:sections.custom-liquid.presets.name",
       "settings": {
         "page_full_width": false,
@@ -61,6 +63,7 @@
     },
     "custom_liquid_7gtkPY": {
       "type": "custom-liquid",
+      "disabled": true,
       "name": "t:sections.custom-liquid.presets.name",
       "settings": {
         "page_full_width": false,
@@ -73,10 +76,24 @@
         "button_link": "",
         "button_style_secondary": false,
         "column_alignment": "center",
-        "custom_liquid": "<div style=\"position:relative;padding-top:56.25%;\"><iframe src=\"https://player.mediadelivery.net/embed/756889/e33de345-dd02-4e56-b240-869bc825097c?autoplay=true&loop=false&muted=true&preload=true&responsive=true\" loading=\"lazy\" style=\"border:0;position:absolute;top:0;height:100%;width:100%;\" allow=\"accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen;\" allowfullscreen=\"true\"></iframe></div>",
+        "custom_liquid": "https://vz-38f9b9a3-4a0.b-cdn.net/e33de345-dd02-4e56-b240-869bc825097c/playlist.m3u8",
         "color_scheme": "background-1",
         "padding_top": 40,
         "padding_bottom": 52
+      }
+    },
+    "member_media_library_hnKgtq": {
+      "type": "member-media-library",
+      "name": "會員電子書與影音",
+      "settings": {
+        "course_product": "電子書-裸體的共產黨-增補版-兩冊套裝-🔔-贈精選有聲書-本地",
+        "max_width": 1100,
+        "desktop_height": 640,
+        "mobile_height": 500,
+        "font_size": 18,
+        "accent_color": "#173b63",
+        "remember_position": true,
+        "locked_message": "此內容僅開放符合資格的會員或已購買者，請使用具有資格的帳號登入。"
       }
     }
   },
@@ -84,6 +101,7 @@
     "main",
     "custom_epub_reader_C78xkY",
     "custom_liquid_cCptVa",
-    "custom_liquid_7gtkPY"
+    "custom_liquid_7gtkPY",
+    "member_media_library_hnKgtq"
   ]
 }
